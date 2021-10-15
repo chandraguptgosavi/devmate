@@ -32,9 +32,18 @@ function Component() {
   const [firstNameError, setFirstNameError] = useState(false);
   const [mailError, setMailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+
+  if (isAuthenticated) {
+    return (
+      <Route
+        render={() => {
+          return <Redirect to={Routes.FEED} />;
+        }}
+      />
+    );
+  }
 
   const onFirstNameChange = (element) => {
     const name = element.target.value.trim();
@@ -93,6 +102,7 @@ function Component() {
         dispatch(
           authenticateAsync(true)
         );
+        history.push(Routes.CREATE_PROFILE)
       } catch (err) {
         console.log(`sign up error: ${err}`);
       }

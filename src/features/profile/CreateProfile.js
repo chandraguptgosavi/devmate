@@ -85,8 +85,9 @@ function CreateProfile() {
   const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
 
-  // if (isAuthenticated)
-  //   return <Route render={() => <Redirect to={Routes.FEED} />} />;
+  if (isAuthenticated) {
+    return <Route render={() => <Redirect to={Routes.FEED} />} />;
+  }
 
   const onStartYearChange = (event) => {
     setStartYear(event.target.value);

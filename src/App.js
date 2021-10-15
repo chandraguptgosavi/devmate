@@ -8,7 +8,8 @@ import { authenticate } from "features/auth/authSlice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Routes from "routes/types";
 import { FallbackComponent, NotFound } from "app/components";
-
+import { signedIn } from "features/profile/userSlice";
+const Feed = React.lazy(() => import("features/feed/Feed"));
 const CreateProfile = React.lazy(() =>
   import("features/profile/CreateProfile")
 );
@@ -34,7 +35,7 @@ function App() {
               uid: authUser.uid,
             })
           );
-          dispatch(authenticate(true));
+          dispatch(signedIn(true));
         } else {
           localStorage.removeItem("user");
         }
@@ -51,7 +52,12 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <PrivateRoute exact path={Routes.CREATEPROFILE}>
+        <PrivateRoute exact path={Routes.FEED}>
+          <Suspense fallback={<FallbackComponent />}>
+            <Feed />
+          </Suspense>
+        </PrivateRoute>
+        <PrivateRoute exact path={Routes.CREATE_PROFILE}>
           <Suspense fallback={<FallbackComponent />}>
             <CreateProfile />
           </Suspense>

@@ -29,6 +29,10 @@ function Component() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
+  if (isAuthenticated) {
+    return <Route render={() => { return <Redirect to={Routes.FEED} /> }} />
+  }
+
   const onEmailChange = (element) => {
     const email = element.target.value.trim();
     setEmail(email);
@@ -71,6 +75,7 @@ function Component() {
         dispatch(
           authenticateAsync(true)
         );
+        history.push(Routes.FEED);
       } catch (err) {
         console.log(`sign in error: ${err}`);
       }

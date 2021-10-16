@@ -8,57 +8,6 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUserID } from "./userSlice";
 
-
-
-function EditProfile({
-  editIndex,
-  currentUser,
-  setCurrentUser,
-  setEditIndex,
-  style,
-}) {
-  return (
-    <>
-      {editIndex === 0 && (
-        <EditProfilePicture
-          user={currentUser}
-          setCurrentUser={setCurrentUser}
-          setEditIndex={setEditIndex}
-        />
-      )}
-      {editIndex === 1 && (
-        <EditIntro
-          user={currentUser}
-          setCurrentUser={setCurrentUser}
-          setEditIndex={setEditIndex}
-        />
-      )}
-      {editIndex === 2 && (
-        <EditAbout
-          user={currentUser}
-          setCurrentUser={setCurrentUser}
-          setEditIndex={setEditIndex}
-        />
-      )}
-      {editIndex === 3 && (
-        <EditEducation
-          user={currentUser}
-          setCurrentUser={setCurrentUser}
-          setEditIndex={setEditIndex}
-        />
-      )}
-      {editIndex === 4 && (
-        <EditSkills
-          user={currentUser}
-          setCurrentUser={setCurrentUser}
-          setEditIndex={setEditIndex}
-          style={style}
-        />
-      )}
-    </>
-  );
-}
-
 function EditProfilePicture({ setCurrentUser, user, ...props }) {
   const setEditIndex = props.setEditIndex;
   const [file, setFile] = useState(null);
@@ -576,25 +525,23 @@ function EditSkills({ setCurrentUser, user, ...props }) {
             }}
           />
         </div>
-        {
-          skills.length > 0 && (
-            <Paper
-          variant="outlined"
-          className="my-2 p-2 overflow-y-auto hide-scrollbar flex justify-center flex-wrap"
-        >
-          {skills.map((skill) => (
-            <Chip
-              key={skill}
-              label={skill}
-              className={`${style.chip} m-2`}
-              onDelete={() => {
-                deleteSkill(skill);
-              }}
-            />
-          ))}
-        </Paper>
-          )
-        }
+        {skills.length > 0 && (
+          <Paper
+            variant="outlined"
+            className="my-2 p-2 overflow-y-auto hide-scrollbar flex justify-center flex-wrap"
+          >
+            {skills.map((skill) => (
+              <Chip
+                key={skill}
+                label={skill}
+                className={`${style.chip} m-2`}
+                onDelete={() => {
+                  deleteSkill(skill);
+                }}
+              />
+            ))}
+          </Paper>
+        )}
         <TextField
           label="Type comma to add skill"
           style={{ margin: ".5em 0" }}
@@ -625,5 +572,56 @@ function EditSkills({ setCurrentUser, user, ...props }) {
     </Card>
   );
 }
+
+function EditProfile({
+  editIndex,
+  currentUser,
+  setCurrentUser,
+  setEditIndex,
+  style,
+}) {
+  return (
+    <>
+      {editIndex === 0 && (
+        <EditProfilePicture
+          user={currentUser}
+          setCurrentUser={setCurrentUser}
+          setEditIndex={setEditIndex}
+        />
+      )}
+      {editIndex === 1 && (
+        <EditIntro
+          user={currentUser}
+          setCurrentUser={setCurrentUser}
+          setEditIndex={setEditIndex}
+        />
+      )}
+      {editIndex === 2 && (
+        <EditAbout
+          user={currentUser}
+          setCurrentUser={setCurrentUser}
+          setEditIndex={setEditIndex}
+        />
+      )}
+      {editIndex === 3 && (
+        <EditEducation
+          user={currentUser}
+          setCurrentUser={setCurrentUser}
+          setEditIndex={setEditIndex}
+        />
+      )}
+      {editIndex === 4 && (
+        <EditSkills
+          user={currentUser}
+          setCurrentUser={setCurrentUser}
+          setEditIndex={setEditIndex}
+          style={style}
+        />
+      )}
+    </>
+  );
+}
+
+
 
 export default EditProfile;

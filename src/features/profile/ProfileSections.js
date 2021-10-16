@@ -1,16 +1,12 @@
- import { faUser } from "@fortawesome/free-regular-svg-icons";
- import {
-   faCode,
-   faGraduationCap,
-   faPencilAlt,
- } from "@fortawesome/free-solid-svg-icons";
- import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
- import { Card, Paper, Grow } from "@mui/material";
- import {
-   Chip,
-   IconButton,
-} from "@material-ui/core";
- 
+import { faUser } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCode,
+  faGraduationCap,
+  faPencilAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Card, Paper, Grow } from "@mui/material";
+import { Chip, IconButton } from "@material-ui/core";
 
 export function Intro({ editIndex, currentUser, isEditable, setEditIndex }) {
   const onConnect = () => {};
@@ -99,7 +95,7 @@ function About(props) {
     >
       <div className="w-4/5 sm:w-3/5">
         <div className="flex justify-between items-center">
-          <p className="my-4 text-colorPrimary font-semibold text-xl">About</p>
+          <p className="my-8 text-colorPrimary font-semibold text-xl">About</p>
           {isEditable && (
             <IconButton
               size="small"
@@ -120,7 +116,7 @@ function About(props) {
   );
 }
 
- function Education(props) {
+function Education(props) {
   const isEditable = props.isEditable;
   const setEditIndex = props.setEditIndex;
   const education = props.education;
@@ -158,7 +154,7 @@ function About(props) {
   );
 }
 
- function Skills(props) {
+function Skills(props) {
   const style = props.style;
   const isEditable = props.isEditable;
   const setEditIndex = props.setEditIndex;
@@ -208,7 +204,7 @@ export function MainSection(props) {
         editIndex !== -1 ? "opacity-60 pointer-events-none" : ""
       } mt-8 h-2/5 w-full lg:w-11/12 flex flex-col sm:flex-row sm:justify-evenly items-center sm:items-stretch`}
     >
-      <div className="w-1/5 hidden sm:flex flex-col justify-evenly bg-colorLightGray">
+      <div className="w-1/5 hidden sm:flex flex-col justify-evenly bg-colorLightGrey">
         <div
           className="cursor-pointer flex justify-evenly items-center"
           onClick={(event) => {

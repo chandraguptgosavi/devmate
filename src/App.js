@@ -35,7 +35,7 @@ function App() {
               uid: authUser.uid,
             })
           );
-          dispatch(signedIn(true));
+          dispatch(signedIn(authUser.uid));
         } else {
           localStorage.removeItem("user");
         }

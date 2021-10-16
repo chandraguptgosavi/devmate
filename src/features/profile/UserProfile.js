@@ -26,6 +26,7 @@ function UserProfile() {
   const { uid } = useParams();
   const style = useStyle();
   const isEditable = useSelector(selectUserID) === uid;
+  console.log(isEditable);
 
   window.onresize = () => {
     const viewportWidth = window.innerWidth;

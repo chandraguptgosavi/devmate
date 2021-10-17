@@ -1,5 +1,5 @@
 import { Card, Paper } from "@mui/material";
-import { TextField, CircularProgress, Button, Chip, TextareaAutosize } from "@material-ui/core";
+import { TextField, CircularProgress, Button, Chip } from "@material-ui/core";
 import CloseIcon from "@mui/icons-material/Close";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";

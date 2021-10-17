@@ -26,7 +26,7 @@ function UserProfile() {
   const { uid } = useParams();
   const style = useStyle();
   const isEditable = useSelector(selectUserID) === uid;
-  console.log(isEditable);
+
 
   window.onresize = () => {
     const viewportWidth = window.innerWidth;
@@ -41,19 +41,18 @@ function UserProfile() {
     setSelectedIndex(index);
   };
 
-  useEffect(() => {
-    let unsubscribe = null;
+  const loadProfile = async () => {
     try {
       const db = getFirestore();
-      getDoc(doc(db, "users", uid)).then((snapshot) =>
-        setCurrentUser(snapshot.data())
-      );
+      const snapshot = await getDoc(doc(db, "users", uid));
+      setCurrentUser(snapshot.data());
     } catch (err) {
       console.log(`error from user profile: ${err}`);
     }
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+  };
+
+  useEffect(() => {
+    loadProfile();
   }, []);
 
   return (

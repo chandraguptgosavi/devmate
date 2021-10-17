@@ -1,5 +1,5 @@
 import { Card, Paper } from "@mui/material";
-import { TextField, CircularProgress, Button, Chip } from "@material-ui/core";
+import { TextField, CircularProgress, Button, Chip, TextareaAutosize } from "@material-ui/core";
 import CloseIcon from "@mui/icons-material/Close";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -47,7 +47,7 @@ function EditProfilePicture({ setCurrentUser, user, ...props }) {
 
   return (
     <Card
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 justify-self-center self-center"
+      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5"
       raised
     >
       <div className="p-2 w-full h-full flex flex-col justify-between">
@@ -151,7 +151,7 @@ function EditIntro({ setCurrentUser, user, ...props }) {
 
   return (
     <Card
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 h-3/5 justify-self-center self-center"
+      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 h-3/5"
       raised
     >
       <div className="p-2 w-full h-full flex flex-col justify-between">
@@ -265,10 +265,9 @@ function EditAbout({ setCurrentUser, user, ...props }) {
        -translate-y-1/2 
        z-10 
        w-4/5 sm:w-3/5 md:w-2/5 
-       justify-self-center 
-       self-center"
+       "
     >
-      <div className="p-2 w-full h-full flex flex-col">
+      <div className="p-2 w-full  flex flex-col">
         <div className="flex justify-between">
           <p className="text-lg">Edit about</p>
           <CloseIcon
@@ -278,8 +277,9 @@ function EditAbout({ setCurrentUser, user, ...props }) {
           />
         </div>
         <TextField
-          className="p-2 mx-1 my-4 rounded-sm border-gray-400 border-2"
+          className="resize-none p-2 mx-1 my-4 rounded-sm border-gray-400 border-2"
           variant="outlined"
+          maxRows="10"
           style={{ margin: "1em 0.25em" }}
           value={about}
           error={aboutError}
@@ -381,7 +381,7 @@ function EditEducation({ setCurrentUser, user, ...props }) {
   return (
     <Card
       raised
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 h-3/5 justify-self-center self-center"
+      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 h-3/5"
     >
       <div className="p-2 w-full h-full flex flex-col justify-between">
         <div className="flex justify-between">
@@ -514,9 +514,9 @@ function EditSkills({ setCurrentUser, user, ...props }) {
   return (
     <Card
       raised
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5  justify-self-center self-center"
+      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-4/5 sm:w-3/5 md:w-2/5 h-3/5 "
     >
-      <div className="p-2 w-full h-full flex flex-col justify-between">
+      <div className="p-2 w-full h-full  flex flex-col justify-between">
         <div className="flex justify-between">
           <p className="text-lg">Edit skills</p>
           <CloseIcon
@@ -525,12 +525,14 @@ function EditSkills({ setCurrentUser, user, ...props }) {
             }}
           />
         </div>
-        {skills.length > 0 && (
-          <Paper
-            variant="outlined"
-            className="my-2 p-2 overflow-y-auto hide-scrollbar flex justify-center flex-wrap"
-          >
-            {skills.map((skill) => (
+
+        <Paper
+          variant="outlined"
+          className="h-2/3 my-2 p-2 overflow-y-auto hide-scrollbar flex justify-center items-center flex-wrap"
+        >
+          {skills.length > 0 ? (
+            <>
+              {skills.map((skill) => (
               <Chip
                 key={skill}
                 label={skill}
@@ -539,11 +541,15 @@ function EditSkills({ setCurrentUser, user, ...props }) {
                   deleteSkill(skill);
                 }}
               />
-            ))}
-          </Paper>
-        )}
+              ))}
+            </>
+          ) : (
+              <div>Add some skills...</div>
+          )}
+        </Paper>
+
         <TextField
-          label="Type comma to add skill"
+          label="Comma adds a skill"
           style={{ margin: ".5em 0" }}
           size="small"
           variant="outlined"

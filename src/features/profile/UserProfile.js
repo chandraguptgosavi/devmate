@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { selectUserID } from "./userSlice";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { LoadingIndicator } from "app/components";
+import { AppBar, LoadingIndicator } from "app/components";
 import EditProfile from "./EditProfile";
 import { Intro, MainSection } from "./ProfileSections";
 
@@ -59,13 +59,14 @@ function UserProfile() {
     <div className="relative flex flex-col items-center h-screen">
       {currentUser ? (
         <>
+          <AppBar showSearchOption={false}/>
           <div
             className="w-full
               flex
               justify-center
               h-1/4 
               overflow-hidden
-            bg-colorPrimary"
+            bg-colorPrimaryDark"
           >
             <img
               className="w-full md:w-3/4 lg:w-2/3 object-cover"

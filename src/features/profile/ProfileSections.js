@@ -202,7 +202,7 @@ export function MainSection(props) {
     <div
       className={`${
         editIndex !== -1 ? "opacity-60 pointer-events-none" : ""
-      } mt-8 h-2/5 w-full lg:w-11/12 flex flex-col sm:flex-row sm:justify-evenly items-center sm:items-stretch`}
+      } mt-8 h-1/3 w-full lg:w-11/12 flex flex-col sm:flex-row sm:justify-evenly items-center sm:items-stretch`}
     >
       <div className="w-1/5 hidden sm:flex flex-col justify-evenly bg-colorLightGrey">
         <div

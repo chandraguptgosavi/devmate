@@ -97,6 +97,22 @@ function Component() {
         });
         await setDoc(doc(getFirestore(), "users", auth.currentUser.uid), {
           firstName: firstName,
+          profilePicture: "",
+          headline: "",
+          github: "",
+          about: "",
+          education: {
+            degree: "",
+            specialization: "",
+            startYear: "",
+            endYear: "",
+          },
+          skills: [],
+          connections: {
+            received: [],
+            sent: [],
+            connected: [],
+          },
         });
         setIsLoading(false);
         dispatch(

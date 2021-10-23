@@ -14,9 +14,8 @@ import { getAuth } from "@firebase/auth";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import Routes from "routes/types";
-import { selectAuthenticated } from "features/auth/authSlice";
-import { Route } from "react-router-dom";
-import { Redirect } from "react-router-dom";
+import { selectUser } from "features/auth/authSlice";
+import { useIsComponentMounted } from "app/hooks";
 
 const useStyle = makeStyles((theme) => {
   return {
@@ -71,7 +70,7 @@ function Skills(props) {
 }
 
 function CreateProfile() {
-  const isAuthenticated = useSelector(selectAuthenticated);
+  const user = useSelector(selectUser);
   const style = useStyle();
   const [degree, setDegree] = useState("");
   const [specialization, setSpecialization] = useState("");
@@ -84,10 +83,7 @@ function CreateProfile() {
   const [githubError, setGithubError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
-
-  if (isAuthenticated) {
-    return <Route render={() => <Redirect to={Routes.FEED} />} />;
-  }
+  const isComponentMounted = useIsComponentMounted();
 
   const onStartYearChange = (event) => {
     setStartYear(event.target.value);
@@ -130,7 +126,8 @@ function CreateProfile() {
         const auth = getAuth();
         const currentUser = auth.currentUser;
         const db = getFirestore();
-        const user = {
+        const newUser = {
+          ...user,
           education: {
             degree: degree,
             specialization: specialization,
@@ -140,9 +137,11 @@ function CreateProfile() {
           skills: skills,
           github: githubURL,
         };
-        await setDoc(doc(db, "users", currentUser.uid), user);
-        setIsLoading(false);
-        history.push(Routes.FEED);
+        await setDoc(doc(db, "users", currentUser.uid), newUser);
+        if (isComponentMounted.current) {
+          setIsLoading(false);
+          history.push(Routes.FEED);
+        }
       } catch (err) {
         console.log(`create profile error: ${err}`);
       }

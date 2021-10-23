@@ -1,4 +1,26 @@
 import { motion } from "framer-motion";
+import { selectUserID, signedInAsync } from "features/auth/authSlice";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { authenticateAsync } from "features/auth/authSlice";
+import { getAuth, signOut } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { FaCommentDots, FaUserCircle } from "react-icons/fa";
+import { FiLogOut, FiMoreVertical } from "react-icons/fi";
+import { MdSearch, MdClose } from "react-icons/md";
+import { IoHome } from "react-icons/io5";
+import { ListItemIcon, ListItemText } from "@material-ui/core";
+import { Menu, MenuItem } from "@mui/material";
+import Routes from "routes/types";
+import {
+  profilesLoading,
+  searchBoxClosed,
+  searchBoxRequested,
+  searched,
+  selectIsSearchBoxVisible,
+} from "features/feed/feedSlice";
+import { useState } from "react";
+import { useStyle } from "./hooks";
 
 export function LoadingIndicator() {
   const dotsContainer = {
@@ -72,10 +94,223 @@ export const FallbackComponent = () => {
       <LoadingIndicator />
     </div>
   );
-}
+};
 
 export const NotFound = () => {
+  return <div>Not Found</div>;
+};
+
+function SearchBox() {
+  const dispatch = useDispatch();
+
+  const onSearchQueryChange = (query) => {
+    dispatch(profilesLoading(true));
+    dispatch(searched(query));
+    dispatch(profilesLoading(false));
+  };
+
   return (
-    <div>Not Found </div>
+    <div className={`bg-colorPrimaryDark w-full h-full flex`}>
+      <input
+        type="text"
+        placeholder="Search skill"
+        className="
+          bg-colorPrimaryDark text-white placeholder-white 
+          px-4 w-full h-full border-0 focus:border-0 
+         focus:outline-none"
+        onChange={(event) => {
+          onSearchQueryChange(event.target.value.toLowerCase());
+        }}
+      />
+      <MdClose
+        className="cursor-pointer mx-4 text-white text-2xl self-center"
+        onClick={() => {
+          dispatch(searchBoxClosed());
+        }}
+      />
+    </div>
+  );
+}
+
+function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
+  const [anchorElement, setAnchorElement] = useState(null);
+  const userID = useSelector(selectUserID);
+  const history = useHistory();
+  const style = useStyle();
+  const isMenuOpen = Boolean(anchorElement);
+
+  const onWindowResize = () => {
+    setAnchorElement(null);
+  }
+
+  window.addEventListener("resize", onWindowResize);
+
+  const onMenuClose = () => {
+    setAnchorElement(null);
+  };
+
+  return (
+    <div>
+      <FiMoreVertical
+        className="cursor-pointer mx-2 xs:mx-4 text-white text-2xl"
+        onClick={(event) => {
+          if (!isMenuOpen) {
+            setAnchorElement(event.target);
+          }
+        }}
+      />
+      <Menu
+        open={isMenuOpen}
+        anchorEl={anchorElement}
+        onClose={onMenuClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+          classes: {
+            list: style.menuItem,
+          }
+        }}
+      >
+        <div className="flex flex-col">
+          <div className={`${showHomeOption ? "block" : "hidden"}`}>
+            <MenuItem
+              onClick={() => {
+                onMenuClose();
+                history.push(Routes.FEED);
+              }}
+            >
+              <ListItemIcon>
+                <IoHome />
+              </ListItemIcon>
+              <ListItemText>Home</ListItemText>
+            </MenuItem>
+          </div>
+          <div className={` `}>
+            <MenuItem
+              onClick={() => {
+                onMenuClose();
+              }}
+            >
+              <ListItemIcon>
+                <FaCommentDots className="" />
+              </ListItemIcon>
+              <ListItemText>Messages</ListItemText>
+            </MenuItem>
+          </div>
+          <div className={`${showProfileOption ? "block" : "hidden"}`}>
+            <MenuItem
+              onClick={() => {
+                onMenuClose();
+                history.push(`${Routes.PROFILE}/${userID}`);
+              }}
+            >
+              <ListItemIcon>
+                <FaUserCircle className="" />
+              </ListItemIcon>
+              <ListItemText>Your Profile</ListItemText>
+            </MenuItem>
+          </div>
+          <div className={``}>
+            <MenuItem
+              onClick={async () => {
+                onMenuClose();
+                await logOut();
+              }}
+            >
+              <ListItemIcon>
+                <FiLogOut className="" />
+              </ListItemIcon>
+              <ListItemText>Log out</ListItemText>
+            </MenuItem>
+          </div>
+        </div>
+      </Menu>
+    </div>
+  );
+}
+
+export function AppBar({
+  showSearchOption = true,
+  showHomeOption = true,
+  showProfileOption = true,
+}) {
+  const isSearchBoxVisible = useSelector(selectIsSearchBoxVisible);
+  const userID = useSelector(selectUserID);
+  const history = useHistory();
+  const dispatch = useDispatch();
+
+  const logOut = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      dispatch(authenticateAsync(false));
+      dispatch(signedInAsync(null));
+    } catch (err) {
+      console.log(`error from App bar: ${err}`);
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-colorPrimary  w-full h-1/12vh">
+      <div
+        className={`${
+          isSearchBoxVisible ? "hidden" : "flex"
+        } w-full h-full items-center justify-between`}
+      >
+        <p className="mx-4 font-semibold text-2xl text-white">DevMate</p>
+        <div className="hidden sm:flex">
+          <MdSearch
+            className={`${
+              showSearchOption ? "block" : "hidden"
+            } cursor-pointer mx-4 text-white text-2xl`}
+            onClick={() => {
+              if (!isSearchBoxVisible) {
+                dispatch(searchBoxRequested());
+                dispatch(searched(""));
+              }
+            }}
+          />
+          <IoHome
+            className={`${
+              showHomeOption ? "block" : "hidden"
+            } cursor-pointer mx-4 text-white text-2xl`}
+            onClick={() => {
+              history.push(Routes.FEED);
+            }}
+          />
+          <FaCommentDots className="cursor-pointer mx-4 text-white text-2xl" />
+          <FaUserCircle
+            className={`${
+              showProfileOption ? "block" : "hidden"
+            } cursor-pointer mx-4 text-white text-2xl`}
+            onClick={() => {
+              history.push(`${Routes.PROFILE}/${userID}`);
+            }}
+          />
+          <FiLogOut
+            className="cursor-pointer mx-4 text-white text-2xl"
+            onClick={logOut}
+          />
+        </div>
+        <div className="cursor-pointer flex sm:hidden">
+          <MdSearch
+            className={`${
+              showSearchOption ? "block" : "hidden"
+            } cursor-pointer mx-4 text-white text-2xl`}
+            onClick={() => {
+              if (!isSearchBoxVisible) {
+                dispatch(searchBoxRequested());
+                dispatch(searched(""));
+              }
+            }}
+          />
+          <OverflowMenu
+            showHomeOption={showHomeOption}
+            showProfileOption={showProfileOption}
+            logOut={logOut}
+          />
+        </div>
+      </div>
+      {isSearchBoxVisible && <SearchBox />}
+    </header>
   );
 }

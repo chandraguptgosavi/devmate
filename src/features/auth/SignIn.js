@@ -1,6 +1,7 @@
 import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "@firebase/auth";
 import { Button, CircularProgress, TextField } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
+import { useIsComponentMounted } from "app/hooks";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
@@ -28,6 +29,7 @@ function Component() {
   const [resetMailSent, setResetMailSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const isComponentMounted = useIsComponentMounted();
 
   if (isAuthenticated) {
     return <Route render={() => { return <Redirect to={Routes.FEED} /> }} />
@@ -71,11 +73,11 @@ function Component() {
           email,
           password
         );
-        setIsLoading(false);
-        dispatch(
-          authenticateAsync(true)
-        );
-        history.push(Routes.FEED);
+        if (isComponentMounted.current) {
+          setIsLoading(false);
+          dispatch(authenticateAsync(true));
+          history.push(Routes.FEED);
+        }
       } catch (err) {
         console.log(`sign in error: ${err}`);
       }

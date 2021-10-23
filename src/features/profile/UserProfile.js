@@ -1,21 +1,14 @@
-import { makeStyles } from "@material-ui/core";
+import { useIsComponentMounted, useStyle } from "app/hooks";
 import CoverImage from "assets/profile-cover-3.svg";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { selectUserID } from "./userSlice";
+import { selectUserID, selectIsUserPresent, selectUserConnections, userUpdatedAsync } from "features/auth/authSlice";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { AppBar, LoadingIndicator } from "app/components";
 import EditProfile from "./EditProfile";
 import { Intro, MainSection } from "./ProfileSections";
-
-const useStyle = makeStyles((theme) => {
-  return {
-    chip: {
-      backgroundColor: theme.palette.primary.light,
-    },
-  };
-});
+import { currentProfileConnectionStatusUpdatedAsync } from "./profileSlice";
 
 function UserProfile() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -23,19 +16,25 @@ function UserProfile() {
     window.innerWidth >= 640 ? 0 : -1
   );
   const [editIndex, setEditIndex] = useState(-1);
-  const { uid } = useParams();
+  const userConnections = useSelector(selectUserConnections);
+  const userID = useSelector(selectUserID);
+  const isUserPresent = useSelector(selectIsUserPresent);
+  const { profileID } = useParams();
   const style = useStyle();
-  const isEditable = useSelector(selectUserID) === uid;
+  const dispatch = useDispatch();
+  const isComponentMounted = useIsComponentMounted();
+  const isEditable = userID === profileID;
 
-
-  window.onresize = () => {
+  const onWindowResize = () => {
     const viewportWidth = window.innerWidth;
     if (viewportWidth >= 640 && selectedIndex === -1) {
       setSelectedIndex(0);
     } else if (viewportWidth < 640 && selectedIndex !== -1) {
       setSelectedIndex(-1);
     }
-  };
+  }
+
+  window.addEventListener("resize", onWindowResize);
 
   const onSectionSelected = (event, index) => {
     setSelectedIndex(index);
@@ -44,7 +43,56 @@ function UserProfile() {
   const loadProfile = async () => {
     try {
       const db = getFirestore();
-      const snapshot = await getDoc(doc(db, "users", uid));
+      const snapshot = await getDoc(doc(db, "users", profileID));
+      if (!isEditable) {
+        if (isUserPresent) {
+          if (isComponentMounted.current) {
+            if (userConnections.connected.some((uid) => uid === profileID)) {
+              dispatch(currentProfileConnectionStatusUpdatedAsync("connected"));
+            } else if (
+              userConnections.received.some((uid) => uid === profileID)
+            ) {
+              dispatch(
+                currentProfileConnectionStatusUpdatedAsync("request_received")
+              );
+            } else if (userConnections.sent.some((uid) => uid === profileID)) {
+              dispatch(
+                currentProfileConnectionStatusUpdatedAsync("request_sent")
+              );
+            }
+          }
+        } else {
+          const userSnapshot = await getDoc(doc(db, "users", userID));
+          if (isComponentMounted.current) {
+            if (
+              userSnapshot
+                .data()
+                .connections.connected.some((uid) => uid === profileID)
+            ) {
+              dispatch(currentProfileConnectionStatusUpdatedAsync("connected"));
+            } else if (
+              userSnapshot
+                .data()
+                .connections.received.some((uid) => uid === profileID)
+            ) {
+              dispatch(
+                currentProfileConnectionStatusUpdatedAsync("request_received")
+              );
+            } else if (
+              userSnapshot
+                .data()
+                .connections.sent.some((uid) => uid === profileID)
+            ) {
+              dispatch(
+                currentProfileConnectionStatusUpdatedAsync("request_sent")
+              );
+            }
+            dispatch(
+              userUpdatedAsync({ ...userSnapshot.data(), isPresent: true })
+            );
+          }
+        }
+      } 
       setCurrentUser(snapshot.data());
     } catch (err) {
       console.log(`error from user profile: ${err}`);
@@ -59,7 +107,7 @@ function UserProfile() {
     <div className="relative flex flex-col items-center h-screen">
       {currentUser ? (
         <>
-          <AppBar showSearchOption={false}/>
+          <AppBar showSearchOption={false} showProfileOption={false} />
           <div
             className="w-full
               flex
@@ -77,7 +125,9 @@ function UserProfile() {
           <Intro
             editIndex={editIndex}
             currentUser={currentUser}
+            profileID={profileID}
             isEditable={isEditable}
+            setCurrentUser={setCurrentUser}
             setEditIndex={setEditIndex}
           />
           <MainSection

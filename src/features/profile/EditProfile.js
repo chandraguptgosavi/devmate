@@ -6,7 +6,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import isURL from "validator/lib/isURL";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { selectUserID } from "./userSlice";
+import { selectUserID } from "features/auth/authSlice";
+import { useIsComponentMounted } from "app/hooks";
 
 function EditProfilePicture({ setCurrentUser, user, ...props }) {
   const setEditIndex = props.setEditIndex;
@@ -14,6 +15,7 @@ function EditProfilePicture({ setCurrentUser, user, ...props }) {
   const [fileError, setFileError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const userID = useSelector(selectUserID);
+  const isComponentMounted = useIsComponentMounted();
 
   const onSave = async () => {
     let valid = true;
@@ -37,8 +39,10 @@ function EditProfilePicture({ setCurrentUser, user, ...props }) {
           profilePicture: profilePictureURL,
         };
         await setDoc(doc(getFirestore(), "users", userID), newUser);
-        setCurrentUser(newUser);
-        setIsLoading(false);
+        if (isComponentMounted.current) {
+          setCurrentUser(newUser);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.log(`error from edit profile picture: ${err}`);
       }
@@ -110,6 +114,7 @@ function EditIntro({ setCurrentUser, user, ...props }) {
   const [githubError, setGithubError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const userID = useSelector(selectUserID);
+  const isComponentMounted = useIsComponentMounted();
 
   const onSave = async () => {
     let error = false;
@@ -141,8 +146,10 @@ function EditIntro({ setCurrentUser, user, ...props }) {
           github: github.trim(),
         };
         await setDoc(doc(getFirestore(), "users", userID), newUser);
-        setCurrentUser(newUser);
-        setIsLoading(false);
+        if (isComponentMounted.current) {
+          setCurrentUser(newUser);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.log(`error from edit intro: ${error}`);
       }
@@ -228,6 +235,7 @@ function EditAbout({ setCurrentUser, user, ...props }) {
   const [aboutError, setAboutError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const userID = useSelector(selectUserID);
+  const isComponentMounted = useIsComponentMounted();
 
   const onSave = async () => {
     let valid = true;
@@ -246,8 +254,10 @@ function EditAbout({ setCurrentUser, user, ...props }) {
           about: currentAbout,
         };
         await setDoc(doc(getFirestore(), "users", userID), newUser);
-        setCurrentUser(newUser);
-        setIsLoading(false);
+        if (isComponentMounted.current) {
+          setCurrentUser(newUser);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.log(`error from edit about: ${err}`);
       }
@@ -324,6 +334,7 @@ function EditEducation({ setCurrentUser, user, ...props }) {
   const [endYearError, setEndYearError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const userID = useSelector(selectUserID);
+  const isComponentMounted = useIsComponentMounted();
 
   const onSave = async () => {
     let valid = true;
@@ -370,8 +381,10 @@ function EditEducation({ setCurrentUser, user, ...props }) {
           },
         };
         await setDoc(doc(getFirestore(), "users", userID), newUser);
-        setCurrentUser(newUser);
-        setIsLoading(false);
+        if (isComponentMounted.current) {
+          setCurrentUser(newUser);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.log(`error from edit education: ${err}`);
       }
@@ -472,6 +485,7 @@ function EditSkills({ setCurrentUser, user, ...props }) {
   const [skillsError, setSkillsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const userID = useSelector(selectUserID);
+  const isComponentMounted = useIsComponentMounted();
 
   const onSkillChange = (event) => {
     setSkill(event.target.value);
@@ -499,8 +513,10 @@ function EditSkills({ setCurrentUser, user, ...props }) {
           skills: skills,
         };
         await setDoc(doc(getFirestore(), "users", userID), newUser);
-        setCurrentUser(newUser);
-        setIsLoading(false);
+        if (isComponentMounted.current) {
+          setCurrentUser(newUser);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.log(`error from edit skills: ${err}`);
       }

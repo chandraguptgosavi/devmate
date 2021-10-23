@@ -7,9 +7,127 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Card, Paper, Grow } from "@mui/material";
 import { Chip, IconButton } from "@material-ui/core";
+import { useSelector } from "react-redux";
+import {
+  currentProfileConnectionStatusUpdatedAsync,
+  selectCurrentProfileConnectionStatus,
+} from "./profileSlice";
+import { useDispatch } from "react-redux";
+import { setDoc, doc, getFirestore, getDoc } from "firebase/firestore";
+import {
+  selectUser,
+  selectUserID,
+  userUpdatedAsync,
+} from "features/auth/authSlice";
+import { useHistory } from "react-router";
+import ProfileIcon from "assets/profile-icon.png";
+import { useIsComponentMounted } from "app/hooks";
 
-export function Intro({ editIndex, currentUser, isEditable, setEditIndex }) {
-  const onConnect = () => {};
+export function Intro({
+  editIndex,
+  currentUser,
+  profileID,
+  isEditable,
+  setEditIndex,
+  setCurrentUser,
+}) {
+  const currentProfileConnectionStatus = useSelector(
+    selectCurrentProfileConnectionStatus
+  );
+  const userID = useSelector(selectUserID);
+  const user = useSelector(selectUser);
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const isComponentMounted = useIsComponentMounted();
+
+  const onConnect = async () => {
+    const db = getFirestore();
+    if (currentProfileConnectionStatus === "normal") {
+      dispatch(currentProfileConnectionStatusUpdatedAsync("request_sending"));
+      try {
+        const updatedUser = {
+          ...user,
+          connections: {
+            ...user.connections,
+            sent: [...user.connections.sent, profileID],
+          },
+        };
+        await setDoc(doc(db, "users", userID), updatedUser);
+        if (isComponentMounted.current) {
+          dispatch(userUpdatedAsync(updatedUser));
+        }
+        const currentProfileUpdatedConnections = {
+          ...currentUser.connections,
+          received: [...currentUser.connections.received, userID],
+        };
+        await setDoc(doc(db, "users", profileID), {
+          ...currentUser,
+          connections: currentProfileUpdatedConnections,
+        });
+        if (isComponentMounted.current) {
+          setCurrentUser({
+            ...currentUser,
+            connections: currentProfileUpdatedConnections,
+          });
+          dispatch(currentProfileConnectionStatusUpdatedAsync("request_sent"));
+        }
+      } catch (err) {
+        console.log(`error from Intro section: ${err}`);
+      }
+    } else if (currentProfileConnectionStatus === "request_received") {
+      dispatch(currentProfileConnectionStatusUpdatedAsync("connecting"));
+      try {
+        const updatedUser = {
+          ...user,
+          connections: {
+            ...user.connections,
+            received: user.connections.received.filter(
+              (id) => id !== profileID
+            ),
+            connected: [...user.connections.connected, profileID],
+          },
+        };
+        await setDoc(doc(db, "users", userID), updatedUser);
+        if (isComponentMounted.current) {
+          dispatch(userUpdatedAsync(updatedUser));
+        }
+        const currentProfileUpdatedConnections = {
+          ...currentUser.connections,
+          sent: currentUser.connections.sent.filter((id) => id !== userID),
+          connected: [...currentUser.connections.connected, userID],
+        };
+        await setDoc(doc(db, "users", profileID), {
+          ...currentUser,
+          connections: currentProfileUpdatedConnections,
+        });
+        const userChatsSnapshot = await getDoc(doc(db, "user_chats", userID));
+        await setDoc(doc(db, "user_chats", userID), {
+          ...userChatsSnapshot.data(),
+          [profileID]: {
+            lastMessage: "",
+          },
+        });
+        const profileChatsSnapshot = await getDoc(doc(db, "user_chats", profileID));
+        await setDoc(doc(db, "user_chats", profileID), {
+          ...profileChatsSnapshot.data(),
+          [userID]: {
+            lastMessage: "",
+          },
+        });
+        if (isComponentMounted.current) {
+          setCurrentUser({
+            ...currentUser,
+            connections: currentProfileUpdatedConnections,
+          });
+          dispatch(currentProfileConnectionStatusUpdatedAsync("connected"));
+       }
+      } catch (err) {
+        console.log(`error from Intro section: ${err}`);
+      }
+    } else if (currentProfileConnectionStatus === "connected") {
+      history.push();
+    }
+  };
 
   return (
     <div
@@ -32,9 +150,9 @@ export function Intro({ editIndex, currentUser, isEditable, setEditIndex }) {
           <img
             className="object-cover w-full h-full overflow-hidden"
             src={
-              currentUser.hasOwnProperty("profilePicture")
+              currentUser.profilePicture.length > 0
                 ? currentUser.profilePicture
-                : ""
+                : ProfileIcon
             }
             alt="profile"
           />
@@ -60,10 +178,22 @@ export function Intro({ editIndex, currentUser, isEditable, setEditIndex }) {
         <p className="text-sm mb-3">{currentUser.headline}</p>
         {!isEditable && (
           <span
-            className="cursor-pointer mr-2 py-2 px-4 font-medium text-sm text-white rounded-2xl bg-colorPrimary"
+            className={`${
+              currentProfileConnectionStatus === "request_sending" ||
+              currentProfileConnectionStatus === "connecting"
+                ? "pointer-events-none bg-colorPrimaryLight text-colorPrimaryDark"
+                : "bg-colorPrimary text-white"
+            } cursor-pointer mr-2 py-2 px-4 font-medium text-sm rounded-2xl`}
             onClick={onConnect}
           >
-            Connect
+            {currentProfileConnectionStatus === "normal" && "Connect"}
+            {currentProfileConnectionStatus === "request_received" && "Connect"}
+            {currentProfileConnectionStatus === "request_sent" &&
+              "Request Sent"}
+            {currentProfileConnectionStatus === "connected" && "Message"}
+            {currentProfileConnectionStatus === "request_sending" &&
+              "Sending Request..."}
+            {currentProfileConnectionStatus === "connecting" && "Connecting..."}
           </span>
         )}
         <span

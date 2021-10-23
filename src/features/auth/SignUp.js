@@ -9,6 +9,7 @@ import {
 import {
   authenticateAsync,
   selectAuthenticated,
+  userUpdatedAsync
 } from "./authSlice";
 import {
   isValidFirstName,
@@ -21,6 +22,7 @@ import { Redirect, Route, useHistory } from "react-router-dom";
 import Routes from "routes/types";
 import AuthBackground from "./AuthBackground";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { useIsComponentMounted } from "app/hooks";
 
 function Component() {
   const isAuthenticated = useSelector(selectAuthenticated);
@@ -34,6 +36,7 @@ function Component() {
   const [passwordError, setPasswordError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const isComponentMounted = useIsComponentMounted();
 
   if (isAuthenticated) {
     return (
@@ -95,7 +98,7 @@ function Component() {
         await updateProfile(auth.currentUser, {
           displayName: firstName,
         });
-        await setDoc(doc(getFirestore(), "users", auth.currentUser.uid), {
+        const user = {
           firstName: firstName,
           profilePicture: "",
           headline: "",
@@ -113,12 +116,14 @@ function Component() {
             sent: [],
             connected: [],
           },
-        });
-        setIsLoading(false);
-        dispatch(
-          authenticateAsync(true)
-        );
-        history.push(Routes.CREATE_PROFILE)
+        };
+        await setDoc(doc(getFirestore(), "users", auth.currentUser.uid), user);
+        if (isComponentMounted.current) {
+          dispatch(userUpdatedAsync({ ...user, isPresent: true }));
+          dispatch(authenticateAsync(true));
+          setIsLoading(false);
+          history.push(Routes.CREATE_PROFILE);
+        }
       } catch (err) {
         console.log(`sign up error: ${err}`);
       }

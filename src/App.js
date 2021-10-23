@@ -4,11 +4,10 @@ import SignUp from "features/auth/SignUp";
 import SignIn from "features/auth/SignIn";
 import PrivateRoute from "routes/PrivateRoute";
 import { useDispatch } from "react-redux";
-import { authenticate } from "features/auth/authSlice";
+import { authenticate, signedIn } from "features/auth/authSlice";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Routes from "routes/types";
 import { FallbackComponent, NotFound } from "app/components";
-import { signedIn } from "features/profile/userSlice";
 const Feed = React.lazy(() => import("features/feed/Feed"));
 const CreateProfile = React.lazy(() =>
   import("features/profile/CreateProfile")
@@ -20,6 +19,7 @@ function App() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (user) {
+    dispatch(signedIn(user.uid));
     dispatch(authenticate(true));
   }
 
@@ -35,7 +35,7 @@ function App() {
               uid: authUser.uid,
             })
           );
-          dispatch(signedIn(authUser.uid));
+            dispatch(signedIn(authUser.uid));
         } else {
           localStorage.removeItem("user");
         }
@@ -47,7 +47,7 @@ function App() {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, []);
+  }, [ dispatch]);
 
   return (
     <BrowserRouter>
@@ -62,7 +62,7 @@ function App() {
             <CreateProfile />
           </Suspense>
         </PrivateRoute>
-        <PrivateRoute exact path={`${Routes.PROFILE}/:uid`}>
+        <PrivateRoute exact path={`${Routes.PROFILE}/:profileID`}>
           <Suspense fallback={<FallbackComponent />}>
             <UserProfile />
           </Suspense>

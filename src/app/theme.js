@@ -1,5 +1,12 @@
 import { createTheme } from "@material-ui/core";
-import { colorPrimary, colorPrimaryDark, colorPrimaryLight } from "./colors";
+import {
+  colorPrimary,
+  colorPrimaryDark,
+  colorPrimaryLight,
+  colorSecondary,
+  colorSecondaryDark,
+  colorSecondaryLight,
+} from "./colors";
 
 const theme = createTheme({
   palette: {
@@ -8,6 +15,11 @@ const theme = createTheme({
       main: colorPrimary,
       dark: colorPrimaryDark,
     },
+    secondary: {
+      light: colorSecondaryLight,
+      main: colorSecondary,
+      dark: colorSecondaryDark,
+    },
     action: {
       disabledBackground: "#D8FBE9",
     },
@@ -15,8 +27,8 @@ const theme = createTheme({
   typography: {
     fontFamily: "'Poppins', 'Urbanist', 'Roboto', sans-serif",
     button: {
-        textTransform: "none",
-        color: "white"
+      textTransform: "none",
+      color: "white",
     },
   },
 });

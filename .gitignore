@@ -25,6 +25,7 @@ yarn-error.log*
 # hidden files
 .*
 !/.gitignore
+!/.babelrc.js
 
 # firebase config
 /src/firebase/config.js

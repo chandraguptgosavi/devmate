@@ -161,7 +161,9 @@ function ChatWindow() {
   };
 
   useEffect(() => {
-    loadMessages();
+    if (chatID) {
+      loadMessages();
+    }
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current();

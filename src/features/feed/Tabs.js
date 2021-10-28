@@ -19,7 +19,7 @@ function FeedTabs() {
           variant="fullWidth"
           indicatorColor="secondary"
           value={tabIndex}
-          TabIndicatorProps={{ style: { height: ".17em" } }}
+          TabIndicatorProps={{ style: { height: ".2em" } }}
           onChange={onTabChange}
         >
           <Tab style={{ fontSize: "1rem", color: "white" }} label="Discover" />

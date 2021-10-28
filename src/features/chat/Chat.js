@@ -1,23 +1,22 @@
-import { AppBar } from "app/components";
+import {AppBar} from "app/components";
 import ChatWindow from "./ChatWindow";
 import ChatList from "./ChatList";
-import { useSelector } from "react-redux";
-import { chatIDChanged, selectChat, selectChatID, selectedChatChanged } from "./chatSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {chatIDChanged, selectChat, selectChatID, selectedChatChanged} from "./chatSlice";
 import ChatWindowPlaceholder from "assets/chat-window-placeholder.png";
 import ProfileIcon from 'assets/profile-icon.png';
-import { useDispatch } from "react-redux";
-import { Avatar } from "@material-ui/core";
-import { MdArrowBack } from "react-icons/md";
+import {Avatar} from "@material-ui/core";
+import {MdArrowBack} from "react-icons/md";
 
 function Chat() {
-  const chatID = useSelector(selectChatID);
-  const selectedChat = useSelector(selectChat);
-  const dispatch = useDispatch();
+    const chatID = useSelector(selectChatID);
+    const selectedChat = useSelector(selectChat);
+    const dispatch = useDispatch();
 
-  // change layout if device width is smaller than 640px
-  window.addEventListener("resize", () => {
-    const viewportWidth = window.innerWidth;
-    if (viewportWidth < 640) {
+    // change layout if device width is smaller than 640px
+    window.addEventListener("resize", () => {
+        const viewportWidth = window.innerWidth;
+        if (viewportWidth < 640) {
       dispatch(selectedChatChanged({}));
       dispatch(chatIDChanged(null));
     }

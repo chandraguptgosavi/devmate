@@ -38,7 +38,7 @@ function AuthBackground({ children }) {
                   <p className="font-bold text-2xl text-colorPrimaryDark">
                       DevMate
                   </p>
-                  <p className="font-semibold text-xl text-gray-600">Find perfect partner for your project</p>
+                  <p className="font-semibold text-xl text-gray-600">Find a perfect partner for your project</p>
               </div>
           </div>
           {children}

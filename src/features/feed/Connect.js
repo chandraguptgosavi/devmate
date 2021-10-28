@@ -18,6 +18,8 @@ import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
 import {useIsComponentMounted} from "app/hooks";
 import {CustomSnackbar} from "app/components";
 import {useState} from "react";
+import Routes from "../../routes/types";
+import {useHistory} from "react-router-dom";
 
 /**
  * Handles request when developer wants to connect with other developer
@@ -35,6 +37,7 @@ export default function Connect({devID, dev}) {
   const isSearchBoxVisible = useSelector(selectIsSearchBoxVisible);
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
+  const history = useHistory();
   const isComponentMounted = useIsComponentMounted();
 
   const onClick = async () => {
@@ -118,7 +121,7 @@ export default function Connect({devID, dev}) {
       // connect with developers who are interested in currently logged user's profile
       else {
         if (dev.connectionStatus === "connected") {
-          return;
+          history.push(Routes.CHAT);
         }
         dispatch(
             requestProfilesLoaded(

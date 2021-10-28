@@ -1,16 +1,16 @@
-import { motion } from "framer-motion";
-import { selectUserID, signedInAsync } from "features/auth/authSlice";
-import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { authenticateAsync } from "features/auth/authSlice";
-import { getAuth, signOut } from "firebase/auth";
-import { useDispatch } from "react-redux";
-import { FaCommentDots, FaUserCircle } from "react-icons/fa";
-import { FiLogOut, FiMoreVertical } from "react-icons/fi";
-import { MdSearch, MdClose } from "react-icons/md";
-import { IoHome } from "react-icons/io5";
-import { ListItemIcon, ListItemText } from "@material-ui/core";
-import { Menu, MenuItem } from "@mui/material";
+import {motion} from "framer-motion";
+import {authenticateAsync, selectUserID, signedInAsync} from "features/auth/authSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {useHistory} from "react-router-dom";
+import {getAuth, signOut} from "firebase/auth";
+import {FaCommentDots, FaUserCircle} from "react-icons/fa";
+import {FiLogOut, FiMoreVertical} from "react-icons/fi";
+import {MdClose, MdSearch} from "react-icons/md";
+import {IoHome} from "react-icons/io5";
+import {ListItemIcon, ListItemText} from "@material-ui/core";
+import {Menu, MenuItem} from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import Routes from "routes/types";
 import {
   profilesLoading,
@@ -19,8 +19,8 @@ import {
   searched,
   selectIsSearchBoxVisible,
 } from "features/feed/feedSlice";
-import { useState } from "react";
-import { useStyle } from "./hooks";
+import {forwardRef, useState} from "react";
+import {useStyle} from "./hooks";
 
 export function LoadingIndicator() {
   const dotsContainer = {
@@ -318,14 +318,42 @@ export function AppBar({
             }}
           />
           <OverflowMenu
-            showHomeOption={showHomeOption}
-            showProfileOption={showProfileOption}
-            showMessagesOption={showMessagesOption}
-            logOut={logOut}
+              showHomeOption={showHomeOption}
+              showProfileOption={showProfileOption}
+              showMessagesOption={showMessagesOption}
+              logOut={logOut}
           />
         </div>
       </div>
-      {isSearchBoxVisible && <SearchBox />}
+      {isSearchBoxVisible && <SearchBox/>}
     </header>
   );
 }
+
+const Alert = forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+export const CustomSnackbar = ({isOpen = false, setIsOpen, severity = "error", message = "Something went wrong!"}) => {
+  const [,] = useState(false);
+
+  const closeSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsOpen(false);
+  };
+
+  return (
+      <Snackbar
+          open={isOpen}
+          anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+          autoHideDuration={5000}
+          onClose={closeSnackbar}
+      >
+        <Alert onClose={closeSnackbar} severity={severity} className="w-full">
+          {message}
+        </Alert>
+      </Snackbar>
+  );
+};

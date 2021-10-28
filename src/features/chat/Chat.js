@@ -14,6 +14,7 @@ function Chat() {
   const selectedChat = useSelector(selectChat);
   const dispatch = useDispatch();
 
+  // change layout if device width is smaller than 640px
   window.addEventListener("resize", () => {
     const viewportWidth = window.innerWidth;
     if (viewportWidth < 640) {

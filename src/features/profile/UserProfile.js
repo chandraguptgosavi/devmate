@@ -1,30 +1,32 @@
-import { useIsComponentMounted, useStyle } from "app/hooks";
+import {useIsComponentMounted, useStyle} from "app/hooks";
 import CoverImage from "assets/profile-cover-3.svg";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { selectUserID, selectIsUserPresent, selectUserConnections, userUpdatedAsync } from "features/auth/authSlice";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { AppBar, LoadingIndicator } from "app/components";
+import {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {useParams} from "react-router-dom";
+import {selectIsUserPresent, selectUserConnections, selectUserID, userUpdatedAsync} from "features/auth/authSlice";
+import {doc, getDoc, getFirestore} from "firebase/firestore";
+import {AppBar, CustomSnackbar, LoadingIndicator} from "app/components";
 import EditProfile from "./EditProfile";
-import { Intro, MainSection } from "./ProfileSections";
-import { currentProfileConnectionStatusUpdatedAsync } from "./profileSlice";
+import {Intro, MainSection} from "./ProfileSections";
+import {currentProfileConnectionStatusUpdatedAsync} from "./profileSlice";
 
 function UserProfile() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(
-    window.innerWidth >= 640 ? 0 : -1
+      window.innerWidth >= 640 ? 0 : -1
   );
   const [editIndex, setEditIndex] = useState(-1);
   const userConnections = useSelector(selectUserConnections);
   const userID = useSelector(selectUserID);
   const isUserPresent = useSelector(selectIsUserPresent);
-  const { profileID } = useParams();
+  const [isOpen, setIsOpen] = useState(false);
+  const {profileID} = useParams();
   const style = useStyle();
   const dispatch = useDispatch();
   const isComponentMounted = useIsComponentMounted();
   const isEditable = userID === profileID;
 
+  // change layout if device width changes
   const onWindowResize = () => {
     const viewportWidth = window.innerWidth;
     if (viewportWidth >= 640 && selectedIndex === -1) {
@@ -84,18 +86,22 @@ function UserProfile() {
                 .connections.sent.some((uid) => uid === profileID)
             ) {
               dispatch(
-                currentProfileConnectionStatusUpdatedAsync("request_sent")
+                  currentProfileConnectionStatusUpdatedAsync("request_sent")
               );
             }
             dispatch(
-              userUpdatedAsync({ ...userSnapshot.data(), isPresent: true })
+                userUpdatedAsync({...userSnapshot.data(), isPresent: true})
             );
           }
         }
-      } 
-      setCurrentUser(snapshot.data());
+      }
+      if (isComponentMounted.current) {
+        setCurrentUser(snapshot.data());
+      }
     } catch (err) {
-      console.log(`error from user profile: ${err}`);
+      if (isComponentMounted.current) {
+        setIsOpen(true);
+      }
     }
   };
 
@@ -150,6 +156,7 @@ function UserProfile() {
       ) : (
         <LoadingIndicator />
       )}
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </div>
   );
 }

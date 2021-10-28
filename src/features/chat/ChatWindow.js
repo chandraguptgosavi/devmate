@@ -1,56 +1,46 @@
-import { Fragment, useRef, useState } from "react";
-import { useEffect } from "react";
-import { FiSend } from "react-icons/fi";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
-import {
-  doc,
-  getFirestore,
-  onSnapshot,
-  setDoc,
-  Timestamp,
-} from "firebase/firestore";
-import {
-  messagedAsync,
-  messagesLoaded,
-  selectChatID,
-  selectMessages,
-} from "./chatSlice";
-import { selectUserID } from "features/auth/authSlice";
-import { Skeleton } from "@material-ui/lab";
-import { useIsComponentMounted } from "app/hooks";
-import { FaCheck } from "react-icons/fa";
-import { IoTime } from "react-icons/io5";
+import {Fragment, useEffect, useRef, useState} from "react";
+import {FiSend} from "react-icons/fi";
+import {useDispatch, useSelector} from "react-redux";
+import {doc, getFirestore, onSnapshot, setDoc, Timestamp,} from "firebase/firestore";
+import {messagedAsync, messagesLoaded, selectChatID, selectMessages,} from "./chatSlice";
+import {selectUserID} from "features/auth/authSlice";
+import {Skeleton} from "@material-ui/lab";
+import {useIsComponentMounted} from "app/hooks";
+import {FaCheck} from "react-icons/fa";
+import {IoTime} from "react-icons/io5";
+import {CustomSnackbar} from "app/components";
 
+/**
+ * Component to show while actual chat loads
+ * @returns {JSX.Element}
+ */
 function ChatWindowSkeleton() {
   const userID = useSelector(selectUserID);
   const placeholderMessages = [
-    { massageID: "" },
-    { massageID: userID },
-    { massageID: "" },
-    { massageID: userID },
-    { massageID: "" },
-    { massageID: userID },
-    { massageID: "" },
-    { massageID: userID },
-    { massageID: "" },
-    { massageID: userID },
+    {massageID: ""},
+    {massageID: userID},
+    {massageID: ""},
+    {massageID: userID},
+    {massageID: ""},
+    {massageID: userID},
+    {massageID: ""},
+    {massageID: userID},
+    {massageID: ""},
+    {massageID: userID},
   ];
 
   return (
-    <>
-      {
-        placeholderMessages.map((message, index) => (
-        <Skeleton
-          key={`${index}`}
-          varinat="text"
-          width="60%"
-          height="20%"
-          className={`${message.massageID === userID && "self-end"} my-1`}
-        />
-        ))
-      }
-    </>
+      <>
+        {placeholderMessages.map((message, index) => (
+            <Skeleton
+                key={`${index}`}
+                varinat="text"
+                width="60%"
+                height="20%"
+                className={`${message.massageID === userID && "self-end"} my-1`}
+            />
+        ))}
+      </>
   );
 }
 
@@ -62,6 +52,7 @@ function ChatWindow() {
   const chatContainer = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentMessage, setCurrentMessage] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const isComponentMounted = useIsComponentMounted();
   const dispatch = useDispatch();
 
@@ -90,28 +81,31 @@ function ChatWindow() {
         doc(getFirestore(), "chat_messages", chatID),
         { includeMetadataChanges: true },
         (doc) => {
-          if (doc.exists() && !doc.metadata.hasPendingWrites) {
-            const data = Object.entries(doc.data()).map(([key, val]) => {
-              return {
-                ...val,
-                massageID: key,
-                time: val.time.toMillis(),
-                isPending: false,
-              };
-            });
-            data.sort((a, b) => {
-              if (a.time < b.time) {
-                return -1;
-              } else if (a.time > b.time) {
-                return 1;
-              } else {
-                return 0;
+          if (doc.exists()) {
+            if (!doc.metadata.hasPendingWrites) {
+              const data = Object.entries(doc.data()).map(([key, val]) => {
+                return {
+                  ...val,
+                  massageID: key,
+                  time: val.time.toMillis(),
+                  isPending: false,
+                };
+              });
+              data.sort((a, b) => {
+                if (a.time < b.time) {
+                  return -1;
+                } else if (a.time > b.time) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              });
+              if (isComponentMounted.current) {
+                dispatch(messagesLoaded(data));
+                scrollToBottom();
               }
-            });
-            if (isComponentMounted.current) {
-              dispatch(messagesLoaded(data));
-              scrollToBottom();
             }
+
           } else if (isComponentMounted.current) {
             dispatch(messagesLoaded([]));
           }
@@ -124,7 +118,10 @@ function ChatWindow() {
         unsubscribeRef.current = unsubscribe;
       }
     } catch (err) {
-      console.log(`error from ChatWindow: ${err}`);
+      if (isComponentMounted.current) {
+        setIsLoading(false);
+        setIsOpen(true);
+      }
     }
   };
 
@@ -155,7 +152,10 @@ function ChatWindow() {
           { merge: true }
         );
       } catch (err) {
-        console.log(`error from ChatWindow: ${err}`);
+        if (isComponentMounted.current) {
+          setIsLoading(false);
+          setIsOpen(true);
+        }
       }
     }
   };
@@ -163,7 +163,9 @@ function ChatWindow() {
   useEffect(() => {
     loadMessages();
     return () => {
-     if(unsubscribeRef.current){  unsubscribeRef.current();}
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
     };
   }, [chatID]);
 
@@ -179,25 +181,23 @@ function ChatWindow() {
           messages.map((messageData, index) => (
             <Fragment key={messageData.massageID}>
               {
-                /** 
-                check whether current date is not same as previous 
-                if true, show the new day of chatting
-                */
+                /**
+                 * check whether current date is not same as previous
+                 * if true, show the new day of chatting
+                 */
                 (index === 0 ||
-                  `${new Date(messageData.time).getDate()}/${new Date(
-                    messageData.time
-                  ).getMonth()}/${new Date(messageData.time).getFullYear()}` !==
+                    `${new Date(messageData.time).getDate()}/${new Date(
+                        messageData.time
+                    ).getMonth()}/${new Date(messageData.time).getFullYear()}` !==
                     `${new Date(messages[index - 1].time).getDate()}/${new Date(
-                      messages[index - 1].time
+                        messages[index - 1].time
                     ).getMonth()}/${new Date(
-                      messages[index - 1].time
+                        messages[index - 1].time
                     ).getFullYear()}`) && (
-                  <div className="my-1 px-2 py-1 rounded-lg bg-colorSecondary self-center">
+                    <div className="my-1 px-2 py-1 rounded-lg bg-colorSecondary self-center">
                     <p className="text-white text-2xs">
                       {
-                        /**
-                         * if date is today's show `Today` instead of date
-                         */
+                        // if date is today's show `Today` instead of date
                         new Intl.DateTimeFormat().format(
                           new Date(messageData.time)
                         ) === new Intl.DateTimeFormat().format(Date.now())
@@ -256,22 +256,23 @@ function ChatWindow() {
       </div>
       <div className="w-full h-1/12 min-h-40px border-t-2 flex justify-items-stretch items-center">
         <input
-          type="text"
-          placeholder="Your message here..."
-          value={currentMessage}
-          className="ml-4 mr-2 w-full h-full border-0 focus:border-0 
+            type="text"
+            placeholder="Your message here..."
+            value={currentMessage}
+            className="ml-4 mr-2 w-full h-full border-0 focus:border-0
          focus:outline-none"
-          onChange={(event) => {
-            setCurrentMessage(event.target.value);
-          }}
+            onChange={(event) => {
+              setCurrentMessage(event.target.value);
+            }}
         />
         <div
-          className="ml-2 mr-4 p-2 cursor-pointer rounded-full shadow-2xl bg-colorPrimary flex items-center"
-          onClick={onSend}
+            className="ml-2 mr-4 p-2 cursor-pointer rounded-full shadow-2xl bg-colorPrimary flex items-center"
+            onClick={onSend}
         >
-          <FiSend className="text-white text-xl" />
+          <FiSend className="text-white text-xl"/>
         </div>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </div>
   );
 }

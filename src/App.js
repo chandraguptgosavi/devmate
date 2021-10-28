@@ -1,16 +1,18 @@
-import React, { Suspense, useEffect } from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import React, {Suspense, useEffect, useState} from "react";
+import {BrowserRouter, Route, Switch} from "react-router-dom";
 import SignUp from "features/auth/SignUp";
 import SignIn from "features/auth/SignIn";
 import PrivateRoute from "routes/PrivateRoute";
-import { useDispatch } from "react-redux";
-import { authenticate, signedIn } from "features/auth/authSlice";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {useDispatch} from "react-redux";
+import {authenticate, signedIn} from "features/auth/authSlice";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 import Routes from "routes/types";
-import { FallbackComponent, NotFound } from "app/components";
+import {CustomSnackbar, FallbackComponent, NotFound} from "app/components";
+import {useIsComponentMounted} from "app/hooks";
+
 const Feed = React.lazy(() => import("features/feed/Feed"));
 const CreateProfile = React.lazy(() =>
-  import("features/profile/CreateProfile")
+    import("features/profile/CreateProfile")
 );
 const UserProfile = React.lazy(() => import("features/profile/UserProfile"));
 const Chat = React.lazy(() => import("features/chat/Chat"));
@@ -18,6 +20,8 @@ const Chat = React.lazy(() => import("features/chat/Chat"));
 function App() {
   const dispatch = useDispatch();
   const user = JSON.parse(localStorage.getItem("user"));
+  const [isOpen, setIsOpen] = useState(false);
+  const isComponentMounted = useIsComponentMounted();
 
   if (user) {
     dispatch(signedIn(user.uid));
@@ -42,11 +46,15 @@ function App() {
         }
       });
     } catch (error) {
-      console.log(error);
+      if (isComponentMounted.current) {
+        setIsOpen(true);
+      }
     }
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [ dispatch]);
 
@@ -74,15 +82,16 @@ function App() {
           </Suspense>
         </PrivateRoute>
         <Route exact path={Routes.LOGIN}>
-          <SignIn />
+          <SignIn/>
         </Route>
         <Route exact path={Routes.SIGNUP}>
-          <SignUp />
+          <SignUp/>
         </Route>
         <Route path="/">
-          <NotFound />
+          <NotFound/>
         </Route>
       </Switch>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </BrowserRouter>
   );
 }

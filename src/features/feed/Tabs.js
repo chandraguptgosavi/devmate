@@ -1,6 +1,6 @@
-import { Tab, Tabs } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
-import { selectIsSearchBoxVisible, selectTabIndex, tabChanged } from "./feedSlice";
+import {Tab, Tabs} from "@material-ui/core";
+import {useDispatch, useSelector} from "react-redux";
+import {selectIsSearchBoxVisible, selectTabIndex, tabChanged} from "./feedSlice";
 
 function FeedTabs() {
 

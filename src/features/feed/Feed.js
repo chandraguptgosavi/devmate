@@ -1,14 +1,7 @@
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import {
-  getDocs,
-  getFirestore,
-  collection,
-  getDoc,
-  doc,
-} from "firebase/firestore";
-import { AppBar } from "app/components";
+import {useDispatch, useSelector} from "react-redux";
+import {useEffect, useState} from "react";
+import {collection, doc, getDoc, getDocs, getFirestore,} from "firebase/firestore";
+import {AppBar, CustomSnackbar} from "app/components";
 import {
   profilesLoadedAsync,
   profilesLoading,
@@ -20,11 +13,11 @@ import {
   selectRequestProfiles,
   selectTabIndex,
 } from "./feedSlice";
-import { userStatusUpdatedAsync, userUpdatedAsync } from "features/auth/authSlice";
+import {userStatusUpdatedAsync, userUpdatedAsync} from "features/auth/authSlice";
 import MainSection from "./MainSection";
 import FeedTabs from "./Tabs";
-import { getAuth } from "firebase/auth";
-import { useIsComponentMounted } from "app/hooks";
+import {getAuth} from "firebase/auth";
+import {useIsComponentMounted} from "app/hooks";
 
 function Feed() {
   const profiles = useSelector(selectProfiles);
@@ -32,6 +25,7 @@ function Feed() {
   const filteredProfiles = useSelector(selectFilteredProfiles);
   const isSearchBoxVisible = useSelector(selectIsSearchBoxVisible);
   const tabIndex = useSelector(selectTabIndex);
+  const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const isComponentMounted = useIsComponentMounted();
 
@@ -66,9 +60,14 @@ function Feed() {
             });
             return;
           }
+          /**
+           * add profile to show in feed if current developer is not present
+           * in the 'sent connection request' list and 'received connection request' list
+           * of currently logged user
+           */
           if (
-            !userConnections.sent.some((uid) => uid === doc.id) &&
-            !userConnections.connected.some((uid) => uid === doc.id)
+              !userConnections.sent.some((uid) => uid === doc.id) &&
+              !userConnections.connected.some((uid) => uid === doc.id)
           ) {
             profilesData.push({
               uid: doc.id,
@@ -107,7 +106,9 @@ function Feed() {
         dispatch(requestProfilesLoadedAsync(requestProfilesData));
       }
     } catch (err) {
-      console.log(`error from feed: ${err}`);
+      if (isComponentMounted.current) {
+        setIsOpen(true);
+      }
     }
   };
 
@@ -122,13 +123,17 @@ function Feed() {
         <FeedTabs />
       </div>
       <MainSection
-        profiles={
-          isSearchBoxVisible
-            ? filteredProfiles
-            : tabIndex === 0
-            ? profiles
-            : requestProfiles
-        }
+          profiles={
+            isSearchBoxVisible
+                ? filteredProfiles
+                : tabIndex === 0
+                    ? profiles
+                    : requestProfiles
+          }
+      />
+      <CustomSnackbar
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
       />
     </div>
   );

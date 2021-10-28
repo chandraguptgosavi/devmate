@@ -1,5 +1,5 @@
 import {makeStyles} from "@material-ui/core";
-import { useEffect, useRef } from "react";
+import {useEffect, useRef} from "react";
 
 export const useStyle = makeStyles((theme) => {
   return {
@@ -17,7 +17,9 @@ export function useIsComponentMounted() {
 
   useEffect(() => {
     isComponentMounted.current = true;
-    return () => (isComponentMounted.current = false);
+    return () => {
+      isComponentMounted.current = false
+    };
   }, []);
 
   return isComponentMounted;

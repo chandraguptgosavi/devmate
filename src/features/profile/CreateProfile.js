@@ -1,21 +1,16 @@
-import {
-  Button,
-  Chip,
-  CircularProgress,
-  makeStyles,
-  TextField,
-} from "@material-ui/core";
-import { Paper } from "@mui/material";
-import React, { useState } from "react";
+import {Button, Chip, CircularProgress, makeStyles, TextField,} from "@material-ui/core";
+import {Paper} from "@mui/material";
+import React, {useState} from "react";
 import validator from "validator";
-import { isValidProfile } from "./utils";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
-import { getAuth } from "@firebase/auth";
-import { useSelector } from "react-redux";
-import { useHistory } from "react-router";
+import {isValidProfile} from "./utils";
+import {doc, getFirestore, setDoc} from "firebase/firestore";
+import {getAuth} from "@firebase/auth";
+import {useSelector} from "react-redux";
+import {useHistory} from "react-router";
 import Routes from "routes/types";
-import { selectUser } from "features/auth/authSlice";
-import { useIsComponentMounted } from "app/hooks";
+import {selectUser} from "features/auth/authSlice";
+import {useIsComponentMounted} from "app/hooks";
+import {CustomSnackbar} from "app/components";
 
 const useStyle = makeStyles((theme) => {
   return {
@@ -69,6 +64,10 @@ function Skills(props) {
   );
 }
 
+/**
+ * Take user info after sign up
+ * @returns {JSX.Element}
+ */
 function CreateProfile() {
   const user = useSelector(selectUser);
   const style = useStyle();
@@ -82,6 +81,7 @@ function CreateProfile() {
   const [skillsError, setSkillsError] = useState(false);
   const [githubError, setGithubError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const history = useHistory();
   const isComponentMounted = useIsComponentMounted();
 
@@ -143,7 +143,10 @@ function CreateProfile() {
           history.push(Routes.FEED);
         }
       } catch (err) {
-        console.log(`create profile error: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     } else {
       setGithubError(true);
@@ -152,96 +155,97 @@ function CreateProfile() {
   };
 
   return (
-    <div className="w-full min-h-screen overflow-y-scroll flex flex-col justify-center items-center">
-      <p className="w-3/4 text-2xl mt-4 font-semibold text-center">
-        Your profile helps you discover new developers and opportunities
-      </p>
-      <div className="flex w-2/3 md:w-2/5 h-full flex-col">
-        <form className="flex flex-col">
-          <TextField
-            label="Degree"
-            variant="outlined"
-            size="small"
-            fullWidth
-            className={`${style.formField}`}
-            onChange={(event) => {
-              setDegree(event.target.value.trim());
-            }}
-          />
-          <TextField
-            label="Specialization"
-            variant="outlined"
-            size="small"
-            fullWidth
-            className={`${style.formField}`}
-            onChange={(event) => {
-              setSpecialization(event.target.value.trim());
-            }}
-          />
-          <div className={`${style.formField} flex justify-between`}>
+      <div className="w-full min-h-screen overflow-y-scroll flex flex-col justify-center items-center">
+        <p className="w-3/4 text-2xl mt-4 font-semibold text-center">
+          Your profile helps you discover new developers and opportunities
+        </p>
+        <div className="flex w-2/3 md:w-2/5 h-full flex-col">
+          <form className="flex flex-col">
             <TextField
-              variant="outlined"
-              size="small"
-              className="w-2/5"
-              label="Start Year"
-              onChange={onStartYearChange}
+                label="Degree"
+                variant="outlined"
+                size="small"
+                fullWidth
+                className={`${style.formField}`}
+                onChange={(event) => {
+                  setDegree(event.target.value.trim());
+                }}
             />
             <TextField
-              variant="outlined"
-              size="small"
-              className="w-2/5"
-              label="End Year"
-              onChange={onEndYearChange}
+                label="Specialization"
+                variant="outlined"
+                size="small"
+                fullWidth
+                className={`${style.formField}`}
+                onChange={(event) => {
+                  setSpecialization(event.target.value.trim());
+                }}
             />
-          </div>
-          <Skills setSkills={setSkills} skills={skills} style={style} />
-          <TextField
-            variant="outlined"
-            size="small"
-            label="Skills"
-            error={skillsError}
-            helperText={
-              skillsError
-                ? "Enter at least one skill"
-                : "Type a skill and press comma ',' to add it"
-            }
-            fullWidth
-            className={`
+            <div className={`${style.formField} flex justify-between`}>
+              <TextField
+                  variant="outlined"
+                  size="small"
+                  className="w-2/5"
+                  label="Start Year"
+                  onChange={onStartYearChange}
+              />
+              <TextField
+                  variant="outlined"
+                  size="small"
+                  className="w-2/5"
+                  label="End Year"
+                  onChange={onEndYearChange}
+              />
+            </div>
+            <Skills setSkills={setSkills} skills={skills} style={style} />
+            <TextField
+                variant="outlined"
+                size="small"
+                label="Skills"
+                error={skillsError}
+                helperText={
+                  skillsError
+                      ? "Enter at least one skill"
+                      : "Type a skill and press comma ',' to add it"
+                }
+                fullWidth
+                className={`
             ${style.formField} 
             `}
-            value={skill}
-            onChange={onSkillsChange}
-            required
-          />
-          <TextField
-            variant="outlined"
-            size="small"
-            label="Github"
-            error={githubError}
-            helperText={githubError ? "Add github profile link" : null}
-            fullWidth
-            className={`
+                value={skill}
+                onChange={onSkillsChange}
+                required
+            />
+            <TextField
+                variant="outlined"
+                size="small"
+                label="Github"
+                error={githubError}
+                helperText={githubError ? "Add github profile link" : null}
+                fullWidth
+                className={`
             ${style.formField} 
             `}
-            onChange={onGithubURLChange}
-            required
-          />
-          <Button
-            color="primary"
-            className={`${style.button} w-full self-center`}
-            variant="contained"
-            onClick={onCreateProfileClick}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <CircularProgress size="1.7em" color="primary" />
-            ) : (
-              <span>Create Profile</span>
-            )}
-          </Button>
-        </form>
+                onChange={onGithubURLChange}
+                required
+            />
+            <Button
+                color="primary"
+                className={`${style.button} w-full self-center`}
+                variant="contained"
+                onClick={onCreateProfileClick}
+                disabled={isLoading}
+            >
+              {isLoading ? (
+                  <CircularProgress size="1.7em" color="primary"/>
+              ) : (
+                  <span>Create Profile</span>
+              )}
+            </Button>
+          </form>
+        </div>
+        <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
       </div>
-    </div>
   );
 }
 

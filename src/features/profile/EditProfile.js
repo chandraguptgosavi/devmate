@@ -1,19 +1,21 @@
-import { Card, Paper } from "@mui/material";
-import { TextField, CircularProgress, Button, Chip } from "@material-ui/core";
+import {Card, Paper} from "@mui/material";
+import {Button, Chip, CircularProgress, TextField} from "@material-ui/core";
 import CloseIcon from "@mui/icons-material/Close";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {doc, getFirestore, setDoc} from "firebase/firestore";
+import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage";
 import isURL from "validator/lib/isURL";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { selectUserID } from "features/auth/authSlice";
-import { useIsComponentMounted } from "app/hooks";
+import {useState} from "react";
+import {useSelector} from "react-redux";
+import {selectUserID} from "features/auth/authSlice";
+import {useIsComponentMounted} from "app/hooks";
+import {CustomSnackbar} from "app/components";
 
-function EditProfilePicture({ setCurrentUser, user, ...props }) {
+function EditProfilePicture({setCurrentUser, user, ...props}) {
   const setEditIndex = props.setEditIndex;
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const userID = useSelector(selectUserID);
   const isComponentMounted = useIsComponentMounted();
 
@@ -44,7 +46,10 @@ function EditProfilePicture({ setCurrentUser, user, ...props }) {
           setIsLoading(false);
         }
       } catch (err) {
-        console.log(`error from edit profile picture: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -85,21 +90,22 @@ function EditProfilePicture({ setCurrentUser, user, ...props }) {
         )}
 
         <Button
-          style={{ marginRight: ".125em" }}
-          className="justify-self-end self-end"
-          size="small"
-          color="primary"
-          variant="contained"
-          onClick={onSave}
-          disabled={isLoading}
+            style={{ marginRight: ".125em" }}
+            className="justify-self-end self-end"
+            size="small"
+            color="primary"
+            variant="contained"
+            onClick={onSave}
+            disabled={isLoading}
         >
           {isLoading ? (
-            <CircularProgress size="1.7em" color="primary" />
+              <CircularProgress size="1.7em" color="primary"/>
           ) : (
-            <span className="text-white">Save</span>
+              <span className="text-white">Save</span>
           )}
         </Button>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </Card>
   );
 }
@@ -113,6 +119,7 @@ function EditIntro({ setCurrentUser, user, ...props }) {
   const [headlineError, setHeadlineError] = useState(false);
   const [githubError, setGithubError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const userID = useSelector(selectUserID);
   const isComponentMounted = useIsComponentMounted();
 
@@ -151,7 +158,10 @@ function EditIntro({ setCurrentUser, user, ...props }) {
           setIsLoading(false);
         }
       } catch (error) {
-        console.log(`error from edit intro: ${error}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -210,21 +220,22 @@ function EditIntro({ setCurrentUser, user, ...props }) {
           required
         />
         <Button
-          style={{ marginRight: ".125em" }}
-          className="justify-self-end self-end"
-          size="small"
-          color="primary"
-          variant="contained"
-          onClick={onSave}
-          disabled={isLoading}
+            style={{ marginRight: ".125em" }}
+            className="justify-self-end self-end"
+            size="small"
+            color="primary"
+            variant="contained"
+            onClick={onSave}
+            disabled={isLoading}
         >
           {isLoading ? (
-            <CircularProgress size="1.7em" color="primary" />
+              <CircularProgress size="1.7em" color="primary"/>
           ) : (
-            <span className="text-white">Save</span>
+              <span className="text-white">Save</span>
           )}
         </Button>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </Card>
   );
 }
@@ -234,6 +245,7 @@ function EditAbout({ setCurrentUser, user, ...props }) {
   const [about, setAbout] = useState(user.about);
   const [aboutError, setAboutError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const userID = useSelector(selectUserID);
   const isComponentMounted = useIsComponentMounted();
 
@@ -259,7 +271,10 @@ function EditAbout({ setCurrentUser, user, ...props }) {
           setIsLoading(false);
         }
       } catch (err) {
-        console.log(`error from edit about: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -301,21 +316,22 @@ function EditAbout({ setCurrentUser, user, ...props }) {
           required
         />
         <Button
-          style={{ marginRight: ".125em" }}
-          className="justify-self-end self-end"
-          size="small"
-          color="primary"
-          variant="contained"
-          onClick={onSave}
-          disabled={isLoading}
+            style={{ marginRight: ".125em" }}
+            className="justify-self-end self-end"
+            size="small"
+            color="primary"
+            variant="contained"
+            onClick={onSave}
+            disabled={isLoading}
         >
           {isLoading ? (
-            <CircularProgress size="1.7em" color="primary" />
+              <CircularProgress size="1.7em" color="primary"/>
           ) : (
-            <span className="text-white">Save</span>
+              <span className="text-white">Save</span>
           )}
         </Button>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </Card>
   );
 }
@@ -333,6 +349,7 @@ function EditEducation({ setCurrentUser, user, ...props }) {
   const [startYearError, setStartYearError] = useState(false);
   const [endYearError, setEndYearError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const userID = useSelector(selectUserID);
   const isComponentMounted = useIsComponentMounted();
 
@@ -386,7 +403,10 @@ function EditEducation({ setCurrentUser, user, ...props }) {
           setIsLoading(false);
         }
       } catch (err) {
-        console.log(`error from edit education: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -458,21 +478,22 @@ function EditEducation({ setCurrentUser, user, ...props }) {
           />
         </div>
         <Button
-          style={{ marginRight: ".125em" }}
-          className="justify-self-end self-end"
-          size="small"
-          color="primary"
-          variant="contained"
-          onClick={onSave}
-          disabled={isLoading}
+            style={{ marginRight: ".125em" }}
+            className="justify-self-end self-end"
+            size="small"
+            color="primary"
+            variant="contained"
+            onClick={onSave}
+            disabled={isLoading}
         >
           {isLoading ? (
-            <CircularProgress size="1.7em" color="primary" />
+              <CircularProgress size="1.7em" color="primary"/>
           ) : (
-            <span className="text-white">Save</span>
+              <span className="text-white">Save</span>
           )}
         </Button>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </Card>
   );
 }
@@ -484,6 +505,7 @@ function EditSkills({ setCurrentUser, user, ...props }) {
   const [skill, setSkill] = useState("");
   const [skillsError, setSkillsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const userID = useSelector(selectUserID);
   const isComponentMounted = useIsComponentMounted();
 
@@ -518,7 +540,10 @@ function EditSkills({ setCurrentUser, user, ...props }) {
           setIsLoading(false);
         }
       } catch (err) {
-        console.log(`error from edit skills: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -549,14 +574,14 @@ function EditSkills({ setCurrentUser, user, ...props }) {
           {skills.length > 0 ? (
             <>
               {skills.map((skill) => (
-              <Chip
-                key={skill}
-                label={skill}
-                className={`${style.chip} m-2`}
-                onDelete={() => {
-                  deleteSkill(skill);
-                }}
-              />
+                  <Chip
+                      key={skill}
+                      label={skill}
+                      className={`${style.chip} m-2`}
+                      onDelete={() => {
+                        deleteSkill(skill);
+                      }}
+                  />
               ))}
             </>
           ) : (
@@ -576,21 +601,22 @@ function EditSkills({ setCurrentUser, user, ...props }) {
           required
         />
         <Button
-          style={{ marginRight: ".125em" }}
-          className="justify-self-end self-end"
-          size="small"
-          color="primary"
-          variant="contained"
-          onClick={onSave}
-          disabled={isLoading}
+            style={{ marginRight: ".125em" }}
+            className="justify-self-end self-end"
+            size="small"
+            color="primary"
+            variant="contained"
+            onClick={onSave}
+            disabled={isLoading}
         >
           {isLoading ? (
-            <CircularProgress size="1.7em" color="primary" />
+              <CircularProgress size="1.7em" color="primary"/>
           ) : (
-            <span className="text-white">Save</span>
+              <span className="text-white">Save</span>
           )}
         </Button>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </Card>
   );
 }

@@ -1,4 +1,4 @@
-import {  Card, CardContent } from "@material-ui/core";
+import {Card, CardContent} from "@material-ui/core";
 import showcaseImage from "assets/auth-card.png";
 import bottomLeftBackground from "assets/left-corner-background.png";
 import topRightBackground from "assets/right-corner-background.png";
@@ -24,14 +24,22 @@ function AuthBackground({ children }) {
         bg-colorPrimaryLight 
         w-1/2
         hidden
-        md:block
+        md:flex
+        items-center
+        justify-center
         "
           >
-            <img
-              className="absolute top-0 right-0 h-full"
-              src={showcaseImage}
-              alt="auth-card"
-            />
+              <img
+                  className="absolute top-0 right-0 h-full"
+                  src={showcaseImage}
+                  alt="auth-card"
+              />
+              <div className="z-10 text-center">
+                  <p className="font-bold text-2xl text-colorPrimaryDark">
+                      DevMate
+                  </p>
+                  <p className="font-semibold text-xl text-gray-600">Find perfect partner for your project</p>
+              </div>
           </div>
           {children}
         </CardContent>

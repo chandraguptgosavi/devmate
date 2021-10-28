@@ -1,41 +1,33 @@
-import { faUser } from "@fortawesome/free-regular-svg-icons";
-import {
-  faCode,
-  faGraduationCap,
-  faPencilAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Card, Paper, Grow } from "@mui/material";
-import { Chip, IconButton } from "@material-ui/core";
-import { useSelector } from "react-redux";
-import {
-  currentProfileConnectionStatusUpdatedAsync,
-  selectCurrentProfileConnectionStatus,
-} from "./profileSlice";
-import { useDispatch } from "react-redux";
-import { setDoc, doc, getFirestore, getDoc } from "firebase/firestore";
-import {
-  selectUser,
-  selectUserID,
-  userUpdatedAsync,
-} from "features/auth/authSlice";
-import { useHistory } from "react-router";
+import {faUser} from "@fortawesome/free-regular-svg-icons";
+import {faCode, faGraduationCap, faPencilAlt,} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {Card, Grow, Paper} from "@mui/material";
+import {Chip, IconButton} from "@material-ui/core";
+import {useDispatch, useSelector} from "react-redux";
+import {currentProfileConnectionStatusUpdatedAsync, selectCurrentProfileConnectionStatus,} from "./profileSlice";
+import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
+import {selectUser, selectUserID, userUpdatedAsync,} from "features/auth/authSlice";
+import {useHistory} from "react-router-dom";
 import ProfileIcon from "assets/profile-icon.png";
-import { useIsComponentMounted } from "app/hooks";
+import {useIsComponentMounted} from "app/hooks";
+import {CustomSnackbar} from "app/components";
+import {useState} from "react";
+import Routes from "routes/types";
 
 export function Intro({
-  editIndex,
-  currentUser,
-  profileID,
-  isEditable,
-  setEditIndex,
-  setCurrentUser,
-}) {
+                        editIndex,
+                        currentUser,
+                        profileID,
+                        isEditable,
+                        setEditIndex,
+                        setCurrentUser,
+                      }) {
   const currentProfileConnectionStatus = useSelector(
-    selectCurrentProfileConnectionStatus
+      selectCurrentProfileConnectionStatus
   );
   const userID = useSelector(selectUserID);
   const user = useSelector(selectUser);
+  const [isOpen, setIsOpen] = useState(false);
   const history = useHistory();
   const dispatch = useDispatch();
   const isComponentMounted = useIsComponentMounted();
@@ -45,6 +37,7 @@ export function Intro({
     if (currentProfileConnectionStatus === "normal") {
       dispatch(currentProfileConnectionStatusUpdatedAsync("request_sending"));
       try {
+        // add developer to 'sent connection request' list of currently logged user
         const updatedUser = {
           ...user,
           connections: {
@@ -56,6 +49,7 @@ export function Intro({
         if (isComponentMounted.current) {
           dispatch(userUpdatedAsync(updatedUser));
         }
+        // add currently logged user to 'received connection request' list of developer
         const currentProfileUpdatedConnections = {
           ...currentUser.connections,
           received: [...currentUser.connections.received, userID],
@@ -72,11 +66,14 @@ export function Intro({
           dispatch(currentProfileConnectionStatusUpdatedAsync("request_sent"));
         }
       } catch (err) {
-        console.log(`error from Intro section: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+        }
       }
     } else if (currentProfileConnectionStatus === "request_received") {
       dispatch(currentProfileConnectionStatusUpdatedAsync("connecting"));
       try {
+        // add developer to 'connected' list of currently logged user
         const updatedUser = {
           ...user,
           connections: {
@@ -91,6 +88,7 @@ export function Intro({
         if (isComponentMounted.current) {
           dispatch(userUpdatedAsync(updatedUser));
         }
+        // add currently logged user to 'connected' list of developer
         const currentProfileUpdatedConnections = {
           ...currentUser.connections,
           sent: currentUser.connections.sent.filter((id) => id !== userID),
@@ -100,39 +98,42 @@ export function Intro({
           ...currentUser,
           connections: currentProfileUpdatedConnections,
         });
+        // add developer to 'chat list' of currently logged user
         const userChatsSnapshot = await getDoc(doc(db, "user_chats", userID));
         await setDoc(doc(db, "user_chats", userID), {
           ...userChatsSnapshot.data(),
           [profileID]: {
-            firstName: user.firstName,
-            profilePicture: user.profilePicture,
-            lastMessage: "",
-          },
-        });
-        const profileChatsSnapshot = await getDoc(doc(db, "user_chats", profileID));
-        await setDoc(doc(db, "user_chats", profileID), {
-          ...profileChatsSnapshot.data(),
-          [userID]: {
             firstName: currentUser.firstName,
             profilePicture: currentUser.profilePicture,
             lastMessage: "",
           },
         });
-        const newChatID =
-          userID < profileID ? `${userID}_${profileID}` : `${profileID}_${userID}`;
-        await setDoc(doc(db, "chat_messages", newChatID));
+        // add currently logged user to 'chat list' of developer
+        const profileChatsSnapshot = await getDoc(
+            doc(db, "user_chats", profileID)
+        );
+        await setDoc(doc(db, "user_chats", profileID), {
+          ...profileChatsSnapshot.data(),
+          [userID]: {
+            firstName: user.firstName,
+            profilePicture: user.profilePicture,
+            lastMessage: "",
+          },
+        });
         if (isComponentMounted.current) {
           setCurrentUser({
             ...currentUser,
             connections: currentProfileUpdatedConnections,
           });
           dispatch(currentProfileConnectionStatusUpdatedAsync("connected"));
-       }
+        }
       } catch (err) {
-        console.log(`error from Intro section: ${err}`);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+        }
       }
     } else if (currentProfileConnectionStatus === "connected") {
-      history.push();
+      history.push(Routes.CHAT);
     }
   };
 
@@ -204,16 +205,17 @@ export function Intro({
           </span>
         )}
         <span
-          className={`${
-            !isEditable ? "ml-2" : ""
-          } cursor-pointer py-2 px-4 font-medium text-sm text-white rounded-2xl bg-colorPrimary`}
-          onClick={() => {
-            window.open(currentUser.github, "_blank").focus();
-          }}
+            className={`${
+                !isEditable ? "ml-2" : ""
+            } cursor-pointer py-2 px-4 font-medium text-sm text-white rounded-2xl bg-colorPrimary`}
+            onClick={() => {
+              window.open(currentUser.github, "_blank").focus();
+            }}
         >
           Github
         </span>
       </div>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
     </div>
   );
 }

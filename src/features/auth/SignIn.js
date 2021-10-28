@@ -1,22 +1,15 @@
-import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "@firebase/auth";
-import { Button, CircularProgress, TextField } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import { useIsComponentMounted } from "app/hooks";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import {
-  Redirect,
-  Route,
-  useHistory,
-} from "react-router-dom";
+import {getAuth, sendPasswordResetEmail, signInWithEmailAndPassword} from "@firebase/auth";
+import {Button, CircularProgress, TextField} from "@material-ui/core";
+import {Alert} from "@material-ui/lab";
+import {CustomSnackbar} from "app/components";
+import {useIsComponentMounted} from "app/hooks";
+import {useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {Redirect, Route, useHistory,} from "react-router-dom";
 import Routes from "routes/types";
 import AuthBackground from "./AuthBackground";
-import {
-  authenticateAsync,
-  selectAuthenticated,
-} from "./authSlice";
-import { isValidEmail, isValidPassword, isValidSignIn, useStyle } from "./utils";
+import {authenticateAsync, selectAuthenticated,} from "./authSlice";
+import {isValidEmail, isValidPassword, isValidSignIn, useStyle} from "./utils";
 
 function Component() {
   const isAuthenticated = useSelector(selectAuthenticated);
@@ -28,11 +21,18 @@ function Component() {
   const [passwordError, setPasswordError] = useState(false);
   const [resetMailSent, setResetMailSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
   const dispatch = useDispatch();
   const isComponentMounted = useIsComponentMounted();
 
+  /**
+   * if user is logged in, redirect to home page
+   */
   if (isAuthenticated) {
-    return <Route render={() => { return <Redirect to={Routes.FEED} /> }} />
+    return <Route render={() => {
+      return <Redirect to={Routes.FEED}/>
+    }}/>
   }
 
   const onEmailChange = (element) => {
@@ -79,7 +79,11 @@ function Component() {
           history.push(Routes.FEED);
         }
       } catch (err) {
-        console.log(`sign in error: ${err}`);
+        if (isComponentMounted.current) {
+          setIsLoading(false);
+          setMessage(err.message);
+          setIsOpen(true);
+        }
       }
     }
   };
@@ -92,7 +96,9 @@ function Component() {
         await sendPasswordResetEmail(auth, email);
         setResetMailSent(true);
       } catch (error) {
-        console.log(error);
+        if (isComponentMounted.current) {
+          setIsOpen(true);
+        }
       }
     } else {
       setMailError(true);
@@ -179,8 +185,9 @@ function Component() {
         </p>
       </div>
       {resetMailSent && (
-        <Alert severity="success">Password reset mail sent succesfully!</Alert>
+          <Alert severity="success">Password reset mail sent successfully!</Alert>
       )}
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} message={message.length > 0 && message}/>
     </div>
   );
 }

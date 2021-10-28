@@ -13,6 +13,7 @@ const CreateProfile = React.lazy(() =>
   import("features/profile/CreateProfile")
 );
 const UserProfile = React.lazy(() => import("features/profile/UserProfile"));
+const Chat = React.lazy(() => import("features/chat/Chat"));
 
 function App() {
   const dispatch = useDispatch();
@@ -65,6 +66,11 @@ function App() {
         <PrivateRoute exact path={`${Routes.PROFILE}/:profileID`}>
           <Suspense fallback={<FallbackComponent />}>
             <UserProfile />
+          </Suspense>
+        </PrivateRoute>
+        <PrivateRoute exact path={Routes.CHAT}>
+          <Suspense fallback={<FallbackComponent />}>
+            <Chat />
           </Suspense>
         </PrivateRoute>
         <Route exact path={Routes.LOGIN}>

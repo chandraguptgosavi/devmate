@@ -117,6 +117,8 @@ export default function Connect({ devID, dev }) {
       await setDoc(doc(db, "user_chats", userID), {
         ...userChatsSnapshot.data(),
         [devID]: {
+          firstName: user.firstName,
+          profilePicture: user.profilePicture,
           lastMessage: "",
         },
       });
@@ -124,9 +126,13 @@ export default function Connect({ devID, dev }) {
       await setDoc(doc(db, "user_chats", devID), {
         ...devChatsSnapshot.data(),
         [userID]: {
+          firstName: dev.firstName,
+          profilePicture: dev.profilePicture,
           lastMessage: "",
         },
       });
+      const newChatID = userID < devID ? `${userID}_${devID}` : `${devID}_${userID}`;
+      await setDoc(doc(db, "chat_messages", newChatID));
       if (isComponentMounted.current) {
         dispatch(
           requestProfilesLoadedAsync(

@@ -2,6 +2,10 @@ const colorPrimaryLight = "#D8FBE9";
 const colorPrimary = "#20AB8A";
 const colorPrimaryDark = "#007b5d";
 const colorLightGrey = "#F1F2F6";
+const colorLightGreyVariant = "#EBF4FB";
+const colorSecondaryLight = "#ff8851";
+const colorSecondary = "#fd5523";
+const colorSecondaryDark = "#c21900";
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
@@ -14,9 +18,16 @@ module.exports = {
         colorPrimaryLight: colorPrimaryLight,
         colorPrimaryDark: colorPrimaryDark,
         colorLightGrey: colorLightGrey,
+        colorLightGreyVariant: colorLightGreyVariant,
+        colorSecondary: colorSecondary,
+        colorSecondaryLight: colorSecondaryLight,
+        colorSecondaryDark: colorSecondaryDark,
       },
       fontFamily: {
         serif: ["Poppins", "Urbanist", "Roboto", "sans-serif"],
+      },
+      fontSize: {
+        "2xs": "0.6rem",
       },
       height: {
         "26%": "26%",
@@ -62,6 +73,7 @@ module.exports = {
         "4/5": "80%",
         "2/5vh": "40vh",
         "1/2vh": "50vh",
+        "40px": "40px",
         "180px": "180px",
         "200px": "200px",
         "220px": "220px",
@@ -74,6 +86,9 @@ module.exports = {
         20: "5rem",
       },
       maxWidth: {
+        "2/3": "66.666667%",
+        "3/4": "75%",
+        "4/5": "80%",
         "60px": "60px",
         "70px": "70px",
         "100px": "100px",

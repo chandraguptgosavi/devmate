@@ -104,6 +104,8 @@ export function Intro({
         await setDoc(doc(db, "user_chats", userID), {
           ...userChatsSnapshot.data(),
           [profileID]: {
+            firstName: user.firstName,
+            profilePicture: user.profilePicture,
             lastMessage: "",
           },
         });
@@ -111,9 +113,14 @@ export function Intro({
         await setDoc(doc(db, "user_chats", profileID), {
           ...profileChatsSnapshot.data(),
           [userID]: {
+            firstName: currentUser.firstName,
+            profilePicture: currentUser.profilePicture,
             lastMessage: "",
           },
         });
+        const newChatID =
+          userID < profileID ? `${userID}_${profileID}` : `${profileID}_${userID}`;
+        await setDoc(doc(db, "chat_messages", newChatID));
         if (isComponentMounted.current) {
           setCurrentUser({
             ...currentUser,

@@ -132,7 +132,12 @@ function SearchBox() {
   );
 }
 
-function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
+function OverflowMenu({
+  showHomeOption,
+  showMessagesOption,
+  showProfileOption,
+  logOut,
+}) {
   const [anchorElement, setAnchorElement] = useState(null);
   const userID = useSelector(selectUserID);
   const history = useHistory();
@@ -141,7 +146,7 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
 
   const onWindowResize = () => {
     setAnchorElement(null);
-  }
+  };
 
   window.addEventListener("resize", onWindowResize);
 
@@ -167,7 +172,7 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
           "aria-labelledby": "basic-button",
           classes: {
             list: style.menuItem,
-          }
+          },
         }}
       >
         <div className="flex flex-col">
@@ -184,14 +189,15 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
               <ListItemText>Home</ListItemText>
             </MenuItem>
           </div>
-          <div className={` `}>
+          <div className={`${showMessagesOption ? "block" : "hidden"}`}>
             <MenuItem
               onClick={() => {
                 onMenuClose();
+                history.push(Routes.CHAT);
               }}
             >
               <ListItemIcon>
-                <FaCommentDots className="" />
+                <FaCommentDots />
               </ListItemIcon>
               <ListItemText>Messages</ListItemText>
             </MenuItem>
@@ -204,7 +210,7 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
               }}
             >
               <ListItemIcon>
-                <FaUserCircle className="" />
+                <FaUserCircle />
               </ListItemIcon>
               <ListItemText>Your Profile</ListItemText>
             </MenuItem>
@@ -217,7 +223,7 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
               }}
             >
               <ListItemIcon>
-                <FiLogOut className="" />
+                <FiLogOut />
               </ListItemIcon>
               <ListItemText>Log out</ListItemText>
             </MenuItem>
@@ -231,6 +237,7 @@ function OverflowMenu({ showHomeOption, showProfileOption, logOut }) {
 export function AppBar({
   showSearchOption = true,
   showHomeOption = true,
+  showMessagesOption = true,
   showProfileOption = true,
 }) {
   const isSearchBoxVisible = useSelector(selectIsSearchBoxVisible);
@@ -250,7 +257,7 @@ export function AppBar({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-colorPrimary  w-full h-1/12vh">
+    <header className="sticky top-0 z-50 bg-colorPrimary w-full h-1/12vh">
       <div
         className={`${
           isSearchBoxVisible ? "hidden" : "flex"
@@ -277,7 +284,14 @@ export function AppBar({
               history.push(Routes.FEED);
             }}
           />
-          <FaCommentDots className="cursor-pointer mx-4 text-white text-2xl" />
+          <FaCommentDots
+            className={`${
+              showMessagesOption ? "block" : "hidden"
+            } cursor-pointer mx-4 text-white text-2xl`}
+            onClick={() => {
+              history.push(Routes.CHAT);
+            }}
+          />
           <FaUserCircle
             className={`${
               showProfileOption ? "block" : "hidden"
@@ -306,6 +320,7 @@ export function AppBar({
           <OverflowMenu
             showHomeOption={showHomeOption}
             showProfileOption={showProfileOption}
+            showMessagesOption={showMessagesOption}
             logOut={logOut}
           />
         </div>

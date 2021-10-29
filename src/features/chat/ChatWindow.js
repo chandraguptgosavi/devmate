@@ -1,14 +1,25 @@
-import {Fragment, useEffect, useRef, useState} from "react";
-import {FiSend} from "react-icons/fi";
-import {useDispatch, useSelector} from "react-redux";
-import {doc, getFirestore, onSnapshot, setDoc, Timestamp,} from "firebase/firestore";
-import {messagedAsync, messagesLoaded, selectChatID, selectMessages,} from "./chatSlice";
-import {selectUserID} from "features/auth/authSlice";
-import {Skeleton} from "@material-ui/lab";
-import {useIsComponentMounted} from "app/hooks";
-import {FaCheck} from "react-icons/fa";
-import {IoTime} from "react-icons/io5";
-import {CustomSnackbar} from "app/components";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { FiSend } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  doc,
+  getFirestore,
+  onSnapshot,
+  setDoc,
+  Timestamp,
+} from "firebase/firestore";
+import {
+  messagedAsync,
+  messagesLoaded,
+  selectChatID,
+  selectMessages,
+} from "./chatSlice";
+import { selectUserID } from "features/auth/authSlice";
+import { Skeleton } from "@material-ui/lab";
+import { useIsComponentMounted } from "app/hooks";
+import { FaCheck } from "react-icons/fa";
+import { IoTime } from "react-icons/io5";
+import { CustomSnackbar } from "app/components";
 
 /**
  * Component to show while actual chat loads
@@ -17,30 +28,30 @@ import {CustomSnackbar} from "app/components";
 function ChatWindowSkeleton() {
   const userID = useSelector(selectUserID);
   const placeholderMessages = [
-    {massageID: ""},
-    {massageID: userID},
-    {massageID: ""},
-    {massageID: userID},
-    {massageID: ""},
-    {massageID: userID},
-    {massageID: ""},
-    {massageID: userID},
-    {massageID: ""},
-    {massageID: userID},
+    { massageID: "" },
+    { massageID: userID },
+    { massageID: "" },
+    { massageID: userID },
+    { massageID: "" },
+    { massageID: userID },
+    { massageID: "" },
+    { massageID: userID },
+    { massageID: "" },
+    { massageID: userID },
   ];
 
   return (
-      <>
-        {placeholderMessages.map((message, index) => (
-            <Skeleton
-                key={`${index}`}
-                varinat="text"
-                width="60%"
-                height="20%"
-                className={`${message.massageID === userID && "self-end"} my-1`}
-            />
-        ))}
-      </>
+    <>
+      {placeholderMessages.map((message, index) => (
+        <Skeleton
+          key={`${index}`}
+          varinat="text"
+          width="60%"
+          height="20%"
+          className={`${message.massageID === userID && "self-end"} my-1`}
+        />
+      ))}
+    </>
   );
 }
 
@@ -105,7 +116,6 @@ function ChatWindow() {
                 scrollToBottom();
               }
             }
-
           } else if (isComponentMounted.current) {
             dispatch(messagesLoaded([]));
           }
@@ -188,15 +198,15 @@ function ChatWindow() {
                  * if true, show the new day of chatting
                  */
                 (index === 0 ||
-                    `${new Date(messageData.time).getDate()}/${new Date(
-                        messageData.time
-                    ).getMonth()}/${new Date(messageData.time).getFullYear()}` !==
+                  `${new Date(messageData.time).getDate()}/${new Date(
+                    messageData.time
+                  ).getMonth()}/${new Date(messageData.time).getFullYear()}` !==
                     `${new Date(messages[index - 1].time).getDate()}/${new Date(
-                        messages[index - 1].time
+                      messages[index - 1].time
                     ).getMonth()}/${new Date(
-                        messages[index - 1].time
+                      messages[index - 1].time
                     ).getFullYear()}`) && (
-                    <div className="my-1 px-2 py-1 rounded-lg bg-colorSecondary self-center">
+                  <div className="my-1 px-2 py-1 rounded-lg bg-colorSecondary self-center">
                     <p className="text-white text-2xs">
                       {
                         // if date is today's show `Today` instead of date
@@ -258,23 +268,28 @@ function ChatWindow() {
       </div>
       <div className="w-full h-1/12 min-h-40px border-t-2 flex justify-items-stretch items-center">
         <input
-            type="text"
-            placeholder="Your message here..."
-            value={currentMessage}
-            className="ml-4 mr-2 w-full h-full border-0 focus:border-0
+          type="text"
+          placeholder="Your message here..."
+          value={currentMessage}
+          className="ml-4 mr-2 w-full h-full border-0 focus:border-0
          focus:outline-none"
-            onChange={(event) => {
-              setCurrentMessage(event.target.value);
-            }}
+          onChange={(event) => {
+            setCurrentMessage(event.target.value);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onSend();
+            }
+          }}
         />
         <div
-            className="ml-2 mr-4 p-2 cursor-pointer rounded-full shadow-2xl bg-colorPrimary flex items-center"
-            onClick={onSend}
+          className="ml-2 mr-4 p-2 cursor-pointer rounded-full shadow-2xl bg-colorPrimary flex items-center"
+          onClick={onSend}
         >
-          <FiSend className="text-white text-xl"/>
+          <FiSend className="text-white text-xl" />
         </div>
       </div>
-      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }

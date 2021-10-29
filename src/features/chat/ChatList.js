@@ -1,48 +1,63 @@
-import {Avatar, Divider, List, ListItem, ListItemAvatar, ListItemText,} from "@material-ui/core";
-import {selectUserID} from "features/auth/authSlice";
-import {Fragment, useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {getAuth} from "firebase/auth";
-import {doc, getDoc, getFirestore} from "firebase/firestore";
-import {useIsComponentMounted} from "app/hooks";
-import {chatIDChanged, selectChat, selectedChatChanged, selectUserChats, userChatsLoadedAsync,} from "./chatSlice";
+import {
+  Avatar,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from "@material-ui/core";
+import { selectUserID } from "features/auth/authSlice";
+import { Fragment, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { useIsComponentMounted } from "app/hooks";
+import {
+  chatIDChanged,
+  selectChat,
+  selectedChatChanged,
+  selectUserChats,
+  userChatsLoadedAsync,
+} from "./chatSlice";
 import ProfileIcon from "assets/profile-icon.png";
-import {Skeleton} from "@material-ui/lab";
-import {ListItemButton} from "@mui/material";
-import {colorSecondary} from "app/colors";
-import {CustomSnackbar} from "app/components";
+import { Skeleton } from "@material-ui/lab";
+import { ListItemButton } from "@mui/material";
+import { colorSecondary } from "app/colors";
+import { CustomSnackbar } from "app/components";
+import { useHistory } from "react-router-dom";
+import Routes from "routes/types";
 
 /**
  * Component to show while actual chat list loads
  * @param {Boolean} isLastRow - isLastRow is responsible for deciding whether to show divider
  * @returns {JSX.Element}
  */
-function ChatListSkeleton({isLastRow}) {
+function ChatListSkeleton({ isLastRow }) {
   const placeholderUserChats = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
   return (
-      <Fragment>
-        {placeholderUserChats.map((_, index) => (
-            <Fragment key={`${index}`}>
-              <ListItem>
-                <ListItemAvatar>
-                  <Skeleton
-                      varinat="circular"
-                      width="35px"
-                      height="60px"
-                      style={{borderRadius: "50%"}}
-                  >
-                    <Avatar/>
-                  </Skeleton>
-                </ListItemAvatar>
-                <ListItemText
-                    primary={<Skeleton varinat="text" width="60%"/>}
-                    secondary={<Skeleton varinat="text"/>}
-                />
-              </ListItem>
-              {placeholderUserChats.length - 1 === index ? null : <Divider/>}
-            </Fragment>
-        ))}
-      </Fragment>
+    <Fragment>
+      {placeholderUserChats.map((_, index) => (
+        <Fragment key={`${index}`}>
+          <ListItem>
+            <ListItemAvatar>
+              <Skeleton
+                varinat="circular"
+                width="35px"
+                height="60px"
+                style={{ borderRadius: "50%" }}
+              >
+                <Avatar />
+              </Skeleton>
+            </ListItemAvatar>
+            <ListItemText
+              primary={<Skeleton varinat="text" width="60%" />}
+              secondary={<Skeleton varinat="text" />}
+            />
+          </ListItem>
+          {placeholderUserChats.length - 1 === index ? null : <Divider />}
+        </Fragment>
+      ))}
+    </Fragment>
   );
 }
 
@@ -54,9 +69,9 @@ function ChatList() {
   const [isOpen, setIsOpen] = useState(false);
   const selectedChat = useSelector(selectChat);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const loadUserChats = async () => {
-
     const setLoadedData = (snapshot) => {
       const data = snapshot.data();
       if (isComponentMounted.current) {
@@ -87,7 +102,7 @@ function ChatList() {
         }
       } else {
         const snapshot = await getDoc(
-            doc(db, "user_chats", auth.currentUser.uid)
+          doc(db, "user_chats", auth.currentUser.uid)
         );
         if (snapshot.exists()) {
           setLoadedData(snapshot);
@@ -113,61 +128,69 @@ function ChatList() {
         {isLoading ? (
           <ChatListSkeleton />
         ) : (
-            userChats.length > 0 && userChats.map((contact, index) => (
-                <Fragment key={contact.uid}>
-                  <ListItemButton
-                      selected={selectedChat.uid === contact.uid}
+          userChats.length > 0 &&
+          userChats.map((contact, index) => (
+            <Fragment key={contact.uid}>
+              <ListItemButton
+                selected={selectedChat.uid === contact.uid}
+                style={{
+                  borderLeft:
+                    selectedChat.uid === contact.uid
+                      ? `0.25em solid ${colorSecondary}`
+                      : "",
+                }}
+                onClick={() => {
+                  dispatch(selectedChatChanged({ ...contact }));
+                  dispatch(
+                    chatIDChanged(
+                      userID < contact.uid
+                        ? `${userID}_${contact.uid}`
+                        : `${contact.uid}_${userID}`
+                    )
+                  );
+                }}
+              >
+                <ListItemAvatar
+                  onClick={() => {
+                    history.push(`${Routes.PROFILE}/${contact.uid}`);
+                  }}
+                >
+                  <Avatar
+                    src={
+                      contact.profilePicture.length > 0
+                        ? contact.profilePicture
+                        : ProfileIcon
+                    }
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={contact.firstName}
+                  secondary={
+                    <span
                       style={{
-                        borderLeft:
-                            selectedChat.uid === contact.uid
-                                ? `0.25em solid ${colorSecondary}`
-                                : "",
+                        display: "-webkit-box",
+                        WebkitLineClamp: "1",
+                        WebkitBoxOrient: "vertical",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
                       }}
-                      onClick={() => {
-                        dispatch(selectedChatChanged({...contact}));
-                        dispatch(
-                            chatIDChanged(
-                                userID < contact.uid
-                                    ? `${userID}_${contact.uid}`
-                                    : `${contact.uid}_${userID}`
-                            )
-                        );
-                      }}
-                  >
-                    <ListItemAvatar>
-                      <Avatar
-                          src={
-                            contact.profilePicture.length > 0
-                                ? contact.profilePicture
-                                : ProfileIcon
-                          }
-                      />
-                    </ListItemAvatar>
-                    <ListItemText
-                        primary={contact.firstName}
-                        secondary={
-                          <span
-                              style={{
-                                display: "-webkit-box",
-                                WebkitLineClamp: "1",
-                                WebkitBoxOrient: "vertical",
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                              }}
-                          >
+                    >
                       {contact.lastMessage}
                     </span>
-                        }
-                    />
-                  </ListItemButton>
-                  {index !== userChats.length - 1 ? <Divider/> : null}
-                </Fragment>
-            ))
+                  }
+                />
+              </ListItemButton>
+              {index !== userChats.length - 1 ? <Divider /> : null}
+            </Fragment>
+          ))
         )}
       </List>
-      {userChats.length === 0 &&
-      <p className="text-center my-auto mx-2">Make some new connections to start chatting!</p>}
-      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
+      {userChats.length === 0 && (
+        <p className="text-center my-auto mx-2">
+          Make some new connections to start chatting!
+        </p>
+      )}
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }

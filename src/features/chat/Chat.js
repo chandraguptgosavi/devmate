@@ -13,21 +13,26 @@ import ProfileIcon from "assets/profile-icon.png";
 import { Avatar } from "@material-ui/core";
 import { MdArrowBack } from "react-icons/md";
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
+import Routes from "routes/types";
+import { useIsComponentMounted } from "app/hooks";
 
 function Chat() {
   const chatID = useSelector(selectChatID);
   const selectedChat = useSelector(selectChat);
   const [isSmallWidth, setIsSmallWidth] = useState(window.innerWidth < 640 ? true : false);
   const dispatch = useDispatch();
+  const history = useHistory();
+  const isComponentMounted = useIsComponentMounted();
 
   // change layout if device width is smaller than 640px
   window.addEventListener("resize", () => {
     if (window.innerWidth < 640) {
-      if (!isSmallWidth) {
+      if (!isSmallWidth && isComponentMounted.current) {
         setIsSmallWidth(true);
       }
     } else {
-      if (isSmallWidth) {
+      if (isSmallWidth && isComponentMounted.current) {
         setIsSmallWidth(false);
       }
     }
@@ -53,6 +58,9 @@ function Chat() {
                   : ProfileIcon
               }
               style={{ marginLeft: ".5em" }}
+              onClick={() => {
+                history.push(`${Routes.PROFILE}/${selectedChat.uid}`)
+              }}
             />
             <p className="ml-4 font-medium text-lg text-colorPrimaryDark">
               {typeof selectedChat.firstName !== "undefined" &&

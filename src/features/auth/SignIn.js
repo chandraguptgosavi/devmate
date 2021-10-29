@@ -171,7 +171,7 @@ function Component() {
           )}
         </Button>
       </form>
-      <div className="flex justify-evenly w-4/5 items-center">
+      <div className="text-center flex justify-evenly w-4/5 items-center">
         <p className="font-light text-sm">
           Forgot your Password?
           <Button

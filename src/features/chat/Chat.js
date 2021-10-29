@@ -13,14 +13,17 @@ import ProfileIcon from "assets/profile-icon.png";
 import { Avatar } from "@material-ui/core";
 import { MdArrowBack } from "react-icons/md";
 import { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import Routes from "routes/types";
 import { useIsComponentMounted } from "app/hooks";
+import { selectUserID } from "features/auth/authSlice";
 
 function Chat() {
   const chatID = useSelector(selectChatID);
   const selectedChat = useSelector(selectChat);
-  const [isSmallWidth, setIsSmallWidth] = useState(window.innerWidth < 640 ? true : false);
+  const [isSmallWidth, setIsSmallWidth] = useState(
+    window.innerWidth < 640 ? true : false
+  );
   const dispatch = useDispatch();
   const history = useHistory();
   const isComponentMounted = useIsComponentMounted();
@@ -59,7 +62,7 @@ function Chat() {
               }
               style={{ marginLeft: ".5em" }}
               onClick={() => {
-                history.push(`${Routes.PROFILE}/${selectedChat.uid}`)
+                history.push(`${Routes.PROFILE}/${selectedChat.uid}`);
               }}
             />
             <p className="ml-4 font-medium text-lg text-colorPrimaryDark">

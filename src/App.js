@@ -56,7 +56,7 @@ function App() {
         unsubscribe();
       }
     };
-  }, [ dispatch]);
+  }, [dispatch]);
 
   return (
     <BrowserRouter>
@@ -76,22 +76,22 @@ function App() {
             <UserProfile />
           </Suspense>
         </PrivateRoute>
-        <PrivateRoute exact path={Routes.CHAT}>
+        <PrivateRoute exact path={`${Routes.CHAT}/:profileID?`}>
           <Suspense fallback={<FallbackComponent />}>
             <Chat />
           </Suspense>
         </PrivateRoute>
         <Route exact path={Routes.LOGIN}>
-          <SignIn/>
+          <SignIn />
         </Route>
         <Route exact path={Routes.SIGNUP}>
-          <SignUp/>
+          <SignUp />
         </Route>
         <Route path="/">
-          <NotFound/>
+          <NotFound />
         </Route>
       </Switch>
-      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} />
     </BrowserRouter>
   );
 }

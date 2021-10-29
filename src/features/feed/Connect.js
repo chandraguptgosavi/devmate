@@ -121,7 +121,7 @@ export default function Connect({devID, dev}) {
       // connect with developers who are interested in currently logged user's profile
       else {
         if (dev.connectionStatus === "connected") {
-          history.push(Routes.CHAT);
+          history.push(`${Routes.CHAT}/${devID}`);
         }
         dispatch(
             requestProfilesLoaded(

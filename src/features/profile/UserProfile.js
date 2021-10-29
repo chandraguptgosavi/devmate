@@ -48,6 +48,7 @@ function UserProfile() {
       const snapshot = await getDoc(doc(db, "users", profileID));
       if (!isEditable) {
         if (isUserPresent) {
+           dispatch(currentProfileConnectionStatusUpdatedAsync("normal"));
           if (isComponentMounted.current) {
             if (userConnections.connected.some((uid) => uid === profileID)) {
               dispatch(currentProfileConnectionStatusUpdatedAsync("connected"));

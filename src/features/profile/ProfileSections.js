@@ -133,7 +133,9 @@ export function Intro({
         }
       }
     } else if (currentProfileConnectionStatus === "connected") {
-      history.push(Routes.CHAT);
+      history.push(
+        `${Routes.CHAT}/${profileID}`
+      );
     }
   };
 

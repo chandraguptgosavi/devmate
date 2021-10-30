@@ -24,6 +24,12 @@ Frontend Code -> [https://github.com/chandraguptgosavi/devmate](https://github.c
 
 <b>Frontned</b>: Reactjs
 <br>
+<b>Styling</b>: CSS and Tailwind CSS
+<br>
+<b>Authentication and Backend</b>: Firebase
+<br>
+<b>Deployment</b>: Netlify
+<br>
 <b>Additional NPM Libraries</b>
   - MUI (formerly Material-UI)
   - redux
@@ -32,13 +38,6 @@ Frontend Code -> [https://github.com/chandraguptgosavi/devmate](https://github.c
   - framer-motion
   - react-icons
   - validator
-<b>Styling</b>: CSS and Tailwind CSS
-<br>
-<b>Authentication and Backend</b>: Firebase
-<br>
-<b>Deployment</b>: Netlify
-<br>
-
 
 # Folder Structure
 ```bash

@@ -1,8 +1,6 @@
 <p align="center">
-  <a href="https://dev-mate.netlify.app/" rel="noopener" target="_blank"><img width="200" src="https://dev-mate.netlify.app/logo.svg" alt="DevMate logo"></a></p>
+  <a href="https://dev-mate.netlify.app/" rel="noopener" target="_blank"><img width="256" src="https://dev-mate.netlify.app/logo.svg" alt="DevMate logo"></a></p>
 </p>
-
-<h1 align="center">DevMate</h1>
 
 <div align="center">
 Easily discover, connect and chat with the software developers across the world and create awesome products.

@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://dev-mate.netlify.app/" rel="noopener" target="_blank"><img width="200" src="https://dev-mate.netlify.app/logo" alt="DevMate logo"></a></p>
+  <a href="https://dev-mate.netlify.app/" rel="noopener" target="_blank"><img width="200" src="https://dev-mate.netlify.app/logo.svg" alt="DevMate logo"></a></p>
 </p>
 
 <h1 align="center">DevMate</h1>
@@ -34,7 +34,6 @@ Frontend Code -> [https://github.com/chandraguptgosavi/devmate](https://github.c
   - framer-motion
   - react-icons
   - validator
-<br>
 <b>Styling</b>: CSS and Tailwind CSS
 <br>
 <b>Authentication and Backend</b>: Firebase

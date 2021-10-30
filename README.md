@@ -100,3 +100,7 @@ Frontend Code -> [https://github.com/chandraguptgosavi/devmate](https://github.c
 └── tailwind.config.js
 
 ```
+
+# License
+
+This project is licensed under the terms of the MIT license.

@@ -153,7 +153,9 @@ export function Intro({
         <Card
           className="w-full md:w-4/5 lg:w-3/4 xl:w-2/3 h-12vh xs:h-1/6vh sm:h-full"
           onClick={() => {
-            setEditIndex(0);
+            if (isEditable) {
+              setEditIndex(0);
+            }
           }}
           raised
         >

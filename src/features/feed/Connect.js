@@ -1,25 +1,30 @@
-import {useDispatch, useSelector} from "react-redux";
-import {Button, CircularProgress} from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, CircularProgress } from "@material-ui/core";
 import {
-    filteredProfilesLoaded,
-    filteredProfilesLoadedAsync,
-    profilesLoaded,
-    profilesLoadedAsync,
-    requestProfilesLoaded,
-    requestProfilesLoadedAsync,
-    selectFilteredProfiles,
-    selectIsSearchBoxVisible,
-    selectProfiles,
-    selectRequestProfiles,
-    selectTabIndex,
+  filteredProfilesLoaded,
+  filteredProfilesLoadedAsync,
+  profilesLoaded,
+  profilesLoadedAsync,
+  requestProfilesLoaded,
+  requestProfilesLoadedAsync,
+  selectFilteredProfiles,
+  selectIsSearchBoxVisible,
+  selectProfiles,
+  selectRequestProfiles,
+  selectTabIndex,
 } from "./feedSlice";
-import {selectUser, selectUserID, userUpdatedAsync,} from "features/auth/authSlice";
-import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
-import {useIsComponentMounted} from "app/hooks";
-import {CustomSnackbar} from "app/components";
-import {useState} from "react";
+import {
+  selectUser,
+  selectUserID,
+  userUpdatedAsync,
+} from "features/auth/authSlice";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import { useIsComponentMounted } from "app/hooks";
+import { CustomSnackbar } from "app/components";
+import { useState } from "react";
 import Routes from "../../routes/types";
-import {useHistory} from "react-router-dom";
+import { useHistory } from "react-router-dom";
+import { chatIDChanged, selectedChatChanged } from "features/chat/chatSlice";
 
 /**
  * Handles request when developer wants to connect with other developer
@@ -27,7 +32,7 @@ import {useHistory} from "react-router-dom";
  * @param {Object} dev - current user info
  * @returns {JSX.Element}
  */
-export default function Connect({devID, dev}) {
+export default function Connect({ devID, dev }) {
   const tabIndex = useSelector(selectTabIndex);
   const user = useSelector(selectUser);
   const userID = useSelector(selectUserID);
@@ -50,28 +55,32 @@ export default function Connect({devID, dev}) {
           return;
         }
         dispatch(
-            profilesLoaded(
-                profiles.map((profile) => {
-                  if (profile.uid === devID) {
-                    return {
-                      ...profile,
-                      connectionStatus: "sending_request",
-                    };
-                  }
-                  return profile;
-                })
-            )
+          profilesLoaded(
+            profiles.map((profile) => {
+              if (profile.uid === devID) {
+                return {
+                  ...profile,
+                  connectionStatus: "sending_request",
+                };
+              }
+              return profile;
+            })
+          )
         );
         if (isSearchBoxVisible) {
-          dispatch(filteredProfilesLoaded(filteredProfiles.map((profile) => {
-            if (profile.uid === devID) {
-              return {
-                ...profile,
-                connectionStatus: "sending_request",
-              };
-            }
-            return profile;
-          })));
+          dispatch(
+            filteredProfilesLoaded(
+              filteredProfiles.map((profile) => {
+                if (profile.uid === devID) {
+                  return {
+                    ...profile,
+                    connectionStatus: "sending_request",
+                  };
+                }
+                return profile;
+              })
+            )
+          );
         }
         // add developer to 'sent connection request' list of currently logged user
         const updatedUser = {
@@ -86,7 +95,7 @@ export default function Connect({devID, dev}) {
           dispatch(userUpdatedAsync(updatedUser));
         }
         // add currently logged user to 'received connection request' list of developer
-        const newDev = {...dev};
+        const newDev = { ...dev };
         delete newDev.connectionStatus;
         await setDoc(doc(db, "users", devID), {
           ...newDev,
@@ -97,51 +106,63 @@ export default function Connect({devID, dev}) {
         });
         if (isComponentMounted.current) {
           dispatch(
-              profilesLoadedAsync(
-                  profiles.map((profile) => {
-                    if (profile.uid === devID) {
-                      return {...profile, connectionStatus: "request_sent"};
-                    }
-                    return profile;
-                  })
-              )
+            profilesLoadedAsync(
+              profiles.map((profile) => {
+                if (profile.uid === devID) {
+                  return { ...profile, connectionStatus: "request_sent" };
+                }
+                return profile;
+              })
+            )
           );
           dispatch(
-              filteredProfilesLoadedAsync(
-                  filteredProfiles.map((profile) => {
-                    if (profile.uid === devID) {
-                      return {...profile, connectionStatus: "request_sent"};
-                    }
-                    return profile;
-                  })
-              )
+            filteredProfilesLoadedAsync(
+              filteredProfiles.map((profile) => {
+                if (profile.uid === devID) {
+                  return { ...profile, connectionStatus: "request_sent" };
+                }
+                return profile;
+              })
+            )
           );
         }
       }
       // connect with developers who are interested in currently logged user's profile
       else {
         if (dev.connectionStatus === "connected") {
-          history.push(`${Routes.CHAT}/${devID}`);
+          dispatch(
+            selectedChatChanged({
+              uid: devID,
+              firstName: dev.firstName,
+              profilePicture: dev.profilePicture,
+            })
+          );
+          dispatch(
+            chatIDChanged(
+              userID < devID ? `${userID}_${devID}` : `${devID}_${userID}`
+            )
+          );
+          history.push(Routes.CHAT);
         }
         dispatch(
-            requestProfilesLoaded(
-                requestedProfiles.map((profile) => {
-                  if (profile.uid === devID) {
-                    return {...profile, connectionStatus: "connecting"};
-                  }
-                  return profile;
-                })
-            )
+          requestProfilesLoaded(
+            requestedProfiles.map((profile) => {
+              if (profile.uid === devID) {
+                return { ...profile, connectionStatus: "connecting" };
+              }
+              return profile;
+            })
+          )
         );
         dispatch(
-            filteredProfilesLoaded(
-                filteredProfiles.map((profile) => {
-                  if (profile.uid === devID) {
-                    return {...profile, connectionStatus: "connecting"};
-                  }
-                  return profile;
-                })
-            )
+          filteredProfilesLoaded(
+            filteredProfiles.map((profile) => {
+              if (profile.uid === devID) {
+                return { ...profile, connectionStatus: "connecting" };
+              }
+              return profile;
+            })
+          )
         );
         // add developer to 'connected' list of currently logged user
         const updatedUser = {
@@ -157,7 +178,7 @@ export default function Connect({devID, dev}) {
           dispatch(userUpdatedAsync(updatedUser));
         }
         // add currently logged user to 'connected' list of developer
-        const newDev = {...dev};
+        const newDev = { ...dev };
         delete newDev.connectionStatus;
         await setDoc(doc(db, "users", devID), {
           ...newDev,
@@ -189,29 +210,29 @@ export default function Connect({devID, dev}) {
         });
         if (isComponentMounted.current) {
           dispatch(
-              requestProfilesLoadedAsync(
-                  requestedProfiles.map((profile) => {
-                    if (profile.uid === devID) {
-                      return {...profile, connectionStatus: "connected"};
-                    }
-                    return profile;
-                  })
-              )
+            requestProfilesLoadedAsync(
+              requestedProfiles.map((profile) => {
+                if (profile.uid === devID) {
+                  return { ...profile, connectionStatus: "connected" };
+                }
+                return profile;
+              })
+            )
           );
           dispatch(
-              filteredProfilesLoadedAsync(
-                  filteredProfiles.map((profile) => {
-                    if (profile.uid === devID) {
-                      return {...profile, connectionStatus: "connected"};
-                    }
-                    return profile;
-                  })
-              )
+            filteredProfilesLoadedAsync(
+              filteredProfiles.map((profile) => {
+                if (profile.uid === devID) {
+                  return { ...profile, connectionStatus: "connected" };
+                }
+                return profile;
+              })
+            )
           );
         }
       }
     } catch (err) {
-      console.log(err.message)
+      console.log(err.message);
       if (isComponentMounted.current) {
         setIsOpen(true);
       }
@@ -219,32 +240,32 @@ export default function Connect({devID, dev}) {
   };
 
   return (
-      <div style={{boxShadow: "1px -0.4em 0.4em #949494"}} className="mt-auto">
-        <Button
-            color="primary"
-            variant="contained"
-            className="w-full"
-            disabled={
-              dev.connectionStatus === "sending_request" ||
-              dev.connectionStatus === "connecting"
-            }
-            onClick={onClick}
-        >
-          {dev.connectionStatus === "normal" && (
-              <span className="text-white">Connect With {dev.firstName}</span>
-          )}
-          {(dev.connectionStatus === "sending_request" ||
-              dev.connectionStatus === "connecting") && (
-              <CircularProgress size="1.7em" color="primary"/>
-          )}
-          {dev.connectionStatus === "request_sent" && (
-              <span className="text-white">Request Sent</span>
-          )}
-          {dev.connectionStatus === "connected" && (
-              <span className="text-white">Message {dev.firstName}</span>
-          )}
-        </Button>
-        <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
-      </div>
+    <div style={{ boxShadow: "1px -0.4em 0.4em #949494" }} className="mt-auto">
+      <Button
+        color="primary"
+        variant="contained"
+        className="w-full"
+        disabled={
+          dev.connectionStatus === "sending_request" ||
+          dev.connectionStatus === "connecting"
+        }
+        onClick={onClick}
+      >
+        {dev.connectionStatus === "normal" && (
+          <span className="text-white">Connect With {dev.firstName}</span>
+        )}
+        {(dev.connectionStatus === "sending_request" ||
+          dev.connectionStatus === "connecting") && (
+          <CircularProgress size="1.7em" color="primary" />
+        )}
+        {dev.connectionStatus === "request_sent" && (
+          <span className="text-white">Request Sent</span>
+        )}
+        {dev.connectionStatus === "connected" && (
+          <span className="text-white">Message {dev.firstName}</span>
+        )}
+      </Button>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} />
+    </div>
   );
 }

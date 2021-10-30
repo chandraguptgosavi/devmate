@@ -1,29 +1,41 @@
-import {faUser} from "@fortawesome/free-regular-svg-icons";
-import {faCode, faGraduationCap, faPencilAlt,} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {Card, Grow, Paper} from "@mui/material";
-import {Chip, IconButton} from "@material-ui/core";
-import {useDispatch, useSelector} from "react-redux";
-import {currentProfileConnectionStatusUpdatedAsync, selectCurrentProfileConnectionStatus,} from "./profileSlice";
-import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
-import {selectUser, selectUserID, userUpdatedAsync,} from "features/auth/authSlice";
-import {useHistory} from "react-router-dom";
+import { faUser } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCode,
+  faGraduationCap,
+  faPencilAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Card, Grow, Paper } from "@mui/material";
+import { Chip, IconButton } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  currentProfileConnectionStatusUpdatedAsync,
+  selectCurrentProfileConnectionStatus,
+} from "./profileSlice";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  selectUser,
+  selectUserID,
+  userUpdatedAsync,
+} from "features/auth/authSlice";
+import { useHistory } from "react-router-dom";
 import ProfileIcon from "assets/profile-icon.png";
-import {useIsComponentMounted} from "app/hooks";
-import {CustomSnackbar} from "app/components";
-import {useState} from "react";
+import { useIsComponentMounted } from "app/hooks";
+import { CustomSnackbar } from "app/components";
+import { useState } from "react";
 import Routes from "routes/types";
+import { chatIDChanged, selectedChatChanged } from "features/chat/chatSlice";
 
 export function Intro({
-                        editIndex,
-                        currentUser,
-                        profileID,
-                        isEditable,
-                        setEditIndex,
-                        setCurrentUser,
-                      }) {
+  editIndex,
+  currentUser,
+  profileID,
+  isEditable,
+  setEditIndex,
+  setCurrentUser,
+}) {
   const currentProfileConnectionStatus = useSelector(
-      selectCurrentProfileConnectionStatus
+    selectCurrentProfileConnectionStatus
   );
   const userID = useSelector(selectUserID);
   const user = useSelector(selectUser);
@@ -37,7 +49,7 @@ export function Intro({
     if (currentProfileConnectionStatus === "normal") {
       dispatch(currentProfileConnectionStatusUpdatedAsync("request_sending"));
       try {
-        // add developer to 'sent connection request' list of currently logged user
+        // add currentUsereloper to 'sent connection request' list of currently logged user
         const updatedUser = {
           ...user,
           connections: {
@@ -49,7 +61,7 @@ export function Intro({
         if (isComponentMounted.current) {
           dispatch(userUpdatedAsync(updatedUser));
         }
-        // add currently logged user to 'received connection request' list of developer
+        // add currently logged user to 'received connection request' list of currentUsereloper
         const currentProfileUpdatedConnections = {
           ...currentUser.connections,
           received: [...currentUser.connections.received, userID],
@@ -73,7 +85,7 @@ export function Intro({
     } else if (currentProfileConnectionStatus === "request_received") {
       dispatch(currentProfileConnectionStatusUpdatedAsync("connecting"));
       try {
-        // add developer to 'connected' list of currently logged user
+        // add currentUsereloper to 'connected' list of currently logged user
         const updatedUser = {
           ...user,
           connections: {
@@ -88,7 +100,7 @@ export function Intro({
         if (isComponentMounted.current) {
           dispatch(userUpdatedAsync(updatedUser));
         }
-        // add currently logged user to 'connected' list of developer
+        // add currently logged user to 'connected' list of currentUsereloper
         const currentProfileUpdatedConnections = {
           ...currentUser.connections,
           sent: currentUser.connections.sent.filter((id) => id !== userID),
@@ -98,7 +110,7 @@ export function Intro({
           ...currentUser,
           connections: currentProfileUpdatedConnections,
         });
-        // add developer to 'chat list' of currently logged user
+        // add currentUsereloper to 'chat list' of currently logged user
         const userChatsSnapshot = await getDoc(doc(db, "user_chats", userID));
         await setDoc(doc(db, "user_chats", userID), {
           ...userChatsSnapshot.data(),
@@ -108,9 +120,9 @@ export function Intro({
             lastMessage: "",
           },
         });
-        // add currently logged user to 'chat list' of developer
+        // add currently logged user to 'chat list' of currentUsereloper
         const profileChatsSnapshot = await getDoc(
-            doc(db, "user_chats", profileID)
+          doc(db, "user_chats", profileID)
         );
         await setDoc(doc(db, "user_chats", profileID), {
           ...profileChatsSnapshot.data(),
@@ -133,9 +145,21 @@ export function Intro({
         }
       }
     } else if (currentProfileConnectionStatus === "connected") {
-      history.push(
-        `${Routes.CHAT}/${profileID}`
+      dispatch(
+        selectedChatChanged({
+          uid: profileID,
+          firstName: currentUser.firstName,
+          profilePicture: currentUser.profilePicture,
+        })
       );
+      dispatch(
+        chatIDChanged(
+          userID < profileID
+            ? `${userID}_${profileID}`
+            : `${profileID}_${userID}`
+        )
+      );
+      history.push(Routes.CHAT);
     }
   };
 
@@ -209,17 +233,17 @@ export function Intro({
           </span>
         )}
         <span
-            className={`${
-                !isEditable ? "ml-2" : ""
-            } cursor-pointer py-2 px-4 font-medium text-sm text-white rounded-2xl bg-colorPrimary`}
-            onClick={() => {
-              window.open(currentUser.github, "_blank").focus();
-            }}
+          className={`${
+            !isEditable ? "ml-2" : ""
+          } cursor-pointer py-2 px-4 font-medium text-sm text-white rounded-2xl bg-colorPrimary`}
+          onClick={() => {
+            window.open(currentUser.github, "_blank").focus();
+          }}
         >
           Github
         </span>
       </div>
-      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen}/>
+      <CustomSnackbar isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );
 }

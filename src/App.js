@@ -76,7 +76,7 @@ function App() {
             <UserProfile />
           </Suspense>
         </PrivateRoute>
-        <PrivateRoute exact path={`${Routes.CHAT}/:profileID?`}>
+        <PrivateRoute exact path={Routes.CHAT}>
           <Suspense fallback={<FallbackComponent />}>
             <Chat />
           </Suspense>

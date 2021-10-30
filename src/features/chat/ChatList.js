@@ -26,7 +26,6 @@ import { colorSecondary } from "app/colors";
 import { CustomSnackbar } from "app/components";
 import { useHistory } from "react-router-dom";
 import Routes from "routes/types";
-import { useParams } from "react-router-dom";
 
 /**
  * Component to show while actual chat list loads
@@ -71,7 +70,7 @@ function ChatList() {
   const selectedChat = useSelector(selectChat);
   const dispatch = useDispatch();
   const history = useHistory();
-  const { profileID } = useParams();
+
 
   const loadUserChats = async () => {
     const setLoadedData = (snapshot) => {
@@ -80,20 +79,6 @@ function ChatList() {
         dispatch(
           userChatsLoadedAsync(
             Object.entries(data).map(([uid, info]) => {
-              if (profileID && profileID === uid) {
-                dispatch(
-                  selectedChatChanged({
-                    ...info,
-                    uid: uid,
-                  })
-                );
-                dispatch(
-                  chatIDChanged(
-                    userID < uid ? `${userID}_${uid}` : `${uid}_${userID}`
-                  )
-                );
-                history.push(Routes.CHAT);
-              }
               return {
                 ...info,
                 uid: uid,

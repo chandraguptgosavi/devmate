@@ -9,10 +9,14 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import {
-  messagedAsync,
+  messaged,
+  selectChat,
   messagesLoaded,
   selectChatID,
   selectMessages,
+  selectedChatChangedAsync,
+  userChatsLoadedAsync,
+  selectUserChats,
 } from "./chatSlice";
 import { selectUserID } from "features/auth/authSlice";
 import { Skeleton } from "@material-ui/lab";
@@ -59,6 +63,8 @@ function ChatWindow() {
   const messages = useSelector(selectMessages);
   const chatID = useSelector(selectChatID);
   const userID = useSelector(selectUserID);
+  const userChats = useSelector(selectUserChats);
+  const selectedChat = useSelector(selectChat);
   const unsubscribeRef = useRef(null);
   const chatContainer = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,16 +142,17 @@ function ChatWindow() {
   };
 
   const onSend = async () => {
-    if (currentMessage.trim().length > 0) {
+    const message = currentMessage.trim();
+    if (message.length > 0) {
       try {
         const newMessageData = {
-          message: currentMessage.trim(),
+          message: message,
           sentBy: userID,
           time: Timestamp.fromMillis(Date.now()),
         };
         const messageID = `${messages.length + 1}_${chatID}`;
         dispatch(
-          messagedAsync({
+          messaged({
             ...newMessageData,
             messageID: messageID,
             time: newMessageData.time.toMillis(),
@@ -154,12 +161,40 @@ function ChatWindow() {
         );
         setCurrentMessage("");
         scrollToBottom();
+        const db = getFirestore();
         await setDoc(
-          doc(getFirestore(), "chat_messages", chatID),
+          doc(db, "chat_messages", chatID),
           {
             [messageID]: newMessageData,
           },
           { merge: true }
+        );
+        await setDoc(
+          doc(db, "user_chats", userID),
+          {
+            [selectedChat.uid]: { lastMessage: message },
+          },
+          { merge: true }
+        );
+        await setDoc(
+          doc(db, "user_chats", selectedChat.uid),
+          {
+            [userID]: { lastMessage: message },
+          },
+          { merge: true }
+        );
+        dispatch(
+          selectedChatChangedAsync({ ...selectedChat, lastMessage: message })
+        );
+        dispatch(
+          userChatsLoadedAsync(
+            userChats.map((chat) => {
+              if (chat.uid === selectedChat.uid) {
+                return { ...chat, lastMessage: message };
+              }
+              return chat;
+            })
+          )
         );
       } catch (err) {
         if (isComponentMounted.current) {

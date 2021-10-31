@@ -41,6 +41,10 @@ export const messagedAsync = (messageData) => (dispatch) => {
   dispatch(messaged(messageData));
 }
 
+export const selectedChatChangedAsync = (selectedChat) => (dispatch) => {
+  dispatch(selectedChatChanged(selectedChat));
+}
+
 export const selectUserChats = (state) => state.chat.userChats;
 export const selectMessages = (state) => state.chat.messages;
 export const selectChatID = state => state.chat.chatID;
